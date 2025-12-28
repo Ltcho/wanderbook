@@ -502,7 +502,6 @@ async function startVideoRecording(){
     statusText.textContent=useMP4?'Encoding MP4...':'Recording video...';
     let frameNum=0;
     const totalFrames=pages.length*(pageTime/1000)*fps;
-    }
     
     for(let pageIdx=0;pageIdx<pages.length;pageIdx++){
         if(recordingCancelled)break;
