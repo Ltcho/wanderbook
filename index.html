@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wanderbook — Your Travel Journal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root{--sky-light:#e8f4fc;--sky-mid:#d4ebf7;--sky-accent:#c5e3f3;--cloud-white:#f8fbfd;--blush-pink:#f5e1e9;--soft-lavender:#e8e4f3;--pale-peach:#fdf3eb;--mint-hint:#e5f5f2;--butter-yellow:#fdf9e8;--mist:#f4f8fb;--cloud:#e9f1f6;--fog:#d4e2eb;--stone:#8a9dad;--slate:#5a7084;--ink:#3a4a58;--gold:#d4a84b;--gold-soft:#e8c97a;--gold-wash:rgba(212,168,75,0.12);--seafoam:#6bb8b0;--seafoam-soft:#8fccc6;--seafoam-wash:rgba(107,184,176,0.10);--blush:#d4a5a5;--blush-wash:rgba(212,165,165,0.12);--lavender:#a8a4c9;--lavender-wash:rgba(168,164,201,0.10)}
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Libre Baskerville',serif;color:var(--ink);min-height:100vh;position:relative;overflow-x:hidden}
+        .sky-background{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,var(--sky-light) 0%,var(--sky-mid) 30%,var(--sky-accent) 60%,var(--sky-mid) 80%,var(--sky-light) 100%)}
+        .sky-wash{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.4;pointer-events:none}.sky-wash.wash-pink{width:400px;height:300px;bottom:10%;left:5%;background:var(--blush-pink)}.sky-wash.wash-lavender{width:350px;height:280px;top:15%;right:10%;background:var(--soft-lavender)}.sky-wash.wash-mint{width:380px;height:300px;bottom:25%;right:5%;background:var(--mint-hint);opacity:0.35}
+        .cloud{position:absolute;background:var(--cloud-white);border-radius:50%;filter:blur(40px);opacity:0.6;pointer-events:none}.cloud-1{width:200px;height:80px;top:8%;left:10%}.cloud-2{width:250px;height:100px;top:20%;right:15%}
+        .container{max-width:800px;margin:0 auto;padding:50px 24px;position:relative;z-index:1}
+        header{text-align:center;margin-bottom:55px;padding:20px 0}.logo{font-family:'Caveat',cursive;font-size:4.8rem;font-weight:400;color:var(--ink);margin-bottom:10px;letter-spacing:-0.02em;position:relative;display:inline-block}.logo::after{content:'';position:absolute;bottom:5px;left:-20px;right:-20px;height:12px;background:linear-gradient(90deg,transparent 0%,var(--seafoam-wash) 20%,var(--gold-wash) 50%,var(--blush-wash) 80%,transparent 100%);filter:blur(3px);border-radius:50%;z-index:-1}.tagline{font-size:1rem;font-style:italic;color:var(--stone)}
+        .journal-page{background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border-radius:6px;padding:45px;margin-bottom:30px;box-shadow:0 2px 4px rgba(58,74,88,0.04),0 8px 24px rgba(58,74,88,0.06);position:relative;overflow:hidden}
+        .section-header{margin-bottom:35px;display:flex;align-items:center;gap:16px}.section-title{font-family:'Caveat',cursive;font-size:2.1rem;font-weight:400;color:var(--ink)}.section-line{flex:1;height:2px;background:linear-gradient(90deg,var(--fog) 0%,transparent 100%)}
+        .mode-picker{display:flex;gap:14px;margin-bottom:32px;flex-wrap:wrap}.mode-option{flex:1;min-width:60px;max-width:85px;aspect-ratio:1;border:1px solid var(--cloud);background:rgba(255,255,255,0.7);border-radius:12px;cursor:pointer;transition:all 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px}.mode-option svg{width:30px;height:30px;stroke:var(--stone);fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;transition:all 0.3s}.mode-option .mode-label{font-family:'Caveat',cursive;font-size:0.9rem;color:var(--stone);transition:color 0.3s}.mode-option:hover svg{stroke:var(--seafoam)}.mode-option:hover .mode-label{color:var(--seafoam)}.mode-option.active{border-color:var(--gold-soft);background:white}.mode-option.active svg{stroke:var(--gold)}.mode-option.active .mode-label{color:var(--gold)}
+        .toggle-field{display:flex;align-items:center;gap:12px;margin-bottom:28px;padding:12px 16px;background:linear-gradient(135deg,var(--seafoam-wash) 0%,transparent 100%);border-radius:8px;width:fit-content}.toggle-check{width:18px;height:18px;accent-color:var(--seafoam)}.toggle-text{font-size:0.9rem;color:var(--slate)}
+        .form-field{margin-bottom:22px;position:relative;z-index:2}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}label{display:block;font-family:'Caveat',cursive;font-size:1.25rem;color:var(--slate);margin-bottom:8px}input[type="text"],input[type="date"]{width:100%;padding:14px 16px;border:1px solid var(--cloud);border-radius:8px;background:rgba(255,255,255,0.9);font-family:'Libre Baskerville',serif;font-size:0.95rem;color:var(--ink);transition:all 0.25s}input:focus{outline:none;border-color:var(--seafoam-soft);background:white;box-shadow:0 0 0 3px var(--seafoam-wash)}input::placeholder{color:var(--stone);opacity:0.6}
+        .autocomplete-wrapper{position:relative}.autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--cloud);border-top:none;border-radius:0 0 8px 8px;box-shadow:0 8px 24px rgba(58,74,88,0.12);max-height:220px;overflow-y:auto;z-index:100;display:none}.autocomplete-dropdown.show{display:block}.autocomplete-item{padding:12px 16px;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--mist);display:flex;align-items:center;gap:10px}.autocomplete-item:last-child{border-bottom:none}.autocomplete-item:hover,.autocomplete-item.highlighted{background:linear-gradient(135deg,var(--seafoam-wash) 0%,var(--gold-wash) 100%)}.autocomplete-item svg{width:16px;height:16px;stroke:var(--stone);fill:none;flex-shrink:0}.autocomplete-item .city-name{font-weight:600;color:var(--ink)}.autocomplete-item .city-details{font-size:0.85rem;color:var(--stone)}
+        .date-row{display:flex;align-items:end;gap:16px;margin-bottom:24px;flex-wrap:wrap}.date-row .form-field{flex:1;min-width:150px;margin-bottom:0}.date-connector{padding-bottom:16px}.date-connector svg{width:28px;height:28px;stroke:var(--stone);fill:none;opacity:0.5}
+        .btn-submit{width:100%;padding:18px 28px;background:linear-gradient(135deg,var(--slate) 0%,var(--ink) 100%);border:none;border-radius:8px;color:white;font-family:'Caveat',cursive;font-size:1.5rem;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:12px}.btn-submit:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(58,74,88,0.2)}.btn-submit svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.5}
+        .error-msg{background:linear-gradient(135deg,var(--blush-wash) 0%,transparent 100%);border-left:3px solid var(--blush);padding:14px 18px;margin-top:16px;font-size:0.9rem;color:var(--ink);border-radius:0 8px 8px 0}
+        .entries-area{margin-top:44px}.entries-title{font-family:'Caveat',cursive;font-size:1.7rem;color:var(--ink);margin-bottom:22px;display:flex;align-items:center;gap:12px}.entries-title svg{width:24px;height:24px;stroke:var(--gold);fill:none}
+        .trips-container{max-height:450px;overflow-y:auto}.trip-group{background:linear-gradient(135deg,var(--gold-wash) 0%,transparent 100%);border:1px solid rgba(212,168,75,0.2);border-radius:12px;padding:16px;margin-bottom:16px}.trip-group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--fog)}.trip-badge{font-family:'Caveat',cursive;font-size:1.1rem;color:var(--gold);background:white;padding:4px 14px;border-radius:16px;border:1px solid var(--gold-soft)}
+        .entry-card{display:flex;align-items:center;gap:16px;padding:18px 20px;margin-bottom:12px;background:rgba(255,255,255,0.95);border-radius:10px;border-left:4px solid var(--cloud);transition:all 0.25s}.entry-card:hover{background:white;border-left-color:var(--seafoam);box-shadow:0 4px 16px rgba(107,184,176,0.1)}.entry-card:last-child{margin-bottom:0}.entry-mode{width:46px;height:46px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(58,74,88,0.06)}.entry-mode svg{width:24px;height:24px;stroke:var(--slate);fill:none;stroke-width:1.3}.entry-info{flex:1}.entry-route{font-family:'Caveat',cursive;font-size:1.45rem;color:var(--ink);margin-bottom:3px}.entry-route .arrow{color:var(--gold);margin:0 8px}.entry-date{font-size:0.8rem;color:var(--stone);font-style:italic}.entry-miles{font-family:'Caveat',cursive;font-size:1.1rem;color:var(--seafoam);padding:6px 14px;background:linear-gradient(135deg,var(--seafoam-wash) 0%,transparent 100%);border-radius:20px;border:1px solid rgba(107,184,176,0.2);white-space:nowrap}.entry-remove{width:32px;height:32px;border:none;background:transparent;color:var(--fog);cursor:pointer;font-size:1.4rem;transition:all 0.2s;border-radius:50%}.entry-remove:hover{color:var(--blush);background:var(--blush-wash)}
+        .empty-state{text-align:center;padding:55px 24px;color:var(--stone)}.empty-state svg{width:80px;height:80px;stroke:var(--fog);fill:none;margin-bottom:20px;stroke-width:1}.empty-state p{font-style:italic;font-size:1rem;line-height:1.6}
+        .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:36px}.stat-box{text-align:center;padding:28px 18px;background:rgba(255,255,255,0.85);border-radius:12px}.stat-box svg{width:28px;height:28px;stroke:var(--gold);fill:none;margin-bottom:10px}.stat-num{font-family:'Caveat',cursive;font-size:2.8rem;color:var(--ink);line-height:1;margin-bottom:6px}.stat-text{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--stone)}
+        .places-area{margin-top:36px}.places-heading{font-family:'Caveat',cursive;font-size:1.5rem;color:var(--ink);margin-bottom:18px}.places-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}.places-card{background:rgba(255,255,255,0.8);border-radius:10px;padding:20px;border:1px solid var(--cloud)}.places-card h4{font-family:'Caveat',cursive;font-size:1.3rem;color:var(--slate);margin-bottom:14px}.places-list{display:flex;flex-wrap:wrap;gap:10px}.place-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:linear-gradient(135deg,rgba(255,255,255,0.9) 0%,var(--lavender-wash) 100%);border:1px solid rgba(168,164,201,0.3);border-radius:20px;font-size:0.9rem;color:var(--slate);transition:all 0.25s}.place-chip:hover{background:linear-gradient(135deg,white 0%,var(--gold-wash) 100%);border-color:var(--gold-soft);transform:translateY(-2px)}.place-chip .num{background:white;padding:2px 8px;border-radius:10px;font-family:'Caveat',cursive;font-size:0.95rem;color:var(--seafoam)}
+        .photos-area{margin-top:36px}.photos-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}.photos-heading{font-family:'Caveat',cursive;font-size:1.5rem;color:var(--ink);display:flex;align-items:center;gap:10px}.photos-heading svg{width:22px;height:22px;stroke:var(--blush);fill:none}.btn-upload{padding:10px 20px;background:linear-gradient(135deg,var(--blush) 0%,#e8b8b8 100%);border:none;border-radius:20px;color:white;font-family:'Caveat',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.3s;display:inline-flex;align-items:center;gap:8px}.btn-upload:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(212,165,165,0.3)}.btn-upload svg{width:18px;height:18px;stroke:currentColor;fill:none}.photo-input{display:none}.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px}.photo-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--cloud);cursor:pointer;transition:transform 0.2s}.photo-item:hover{transform:scale(1.05)}.photo-item img{width:100%;height:100%;object-fit:cover}.photo-item .photo-remove{position:absolute;top:4px;right:4px;width:24px;height:24px;background:rgba(0,0,0,0.5);border:none;border-radius:50%;color:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s}.photo-item:hover .photo-remove{opacity:1}.photo-item.dragging{opacity:0.5;cursor:grabbing}.photo-item.drag-over{outline:2px dashed var(--gold);outline-offset:2px}.photo-item{cursor:grab}.photo-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;background:linear-gradient(135deg,var(--blush-wash) 0%,var(--lavender-wash) 100%);border:2px dashed var(--fog);border-radius:12px;color:var(--stone);text-align:center;cursor:pointer;transition:all 0.3s}.photo-placeholder:hover{border-color:var(--blush)}.photo-placeholder svg{width:40px;height:40px;stroke:var(--stone);fill:none;margin-bottom:10px}.photo-placeholder p{font-family:'Caveat',cursive;font-size:1.1rem}.photo-count{font-size:0.85rem;color:var(--stone);font-style:italic}
+        .wrapped-btn-area{margin-top:36px;text-align:center;display:flex;flex-wrap:wrap;gap:15px;justify-content:center}.btn-wrapped{padding:16px 32px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold-soft) 100%);border:none;border-radius:30px;color:white;font-family:'Caveat',cursive;font-size:1.4rem;cursor:pointer;transition:all 0.3s;display:inline-flex;align-items:center;gap:10px;box-shadow:0 4px 15px rgba(212,168,75,0.3)}.btn-wrapped:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 8px 25px rgba(212,168,75,0.4)}.btn-wrapped svg{width:24px;height:24px;stroke:currentColor;fill:none}.btn-download{padding:16px 24px;background:linear-gradient(135deg,var(--seafoam) 0%,var(--seafoam-soft) 100%);border:none;border-radius:30px;color:white;font-family:'Caveat',cursive;font-size:1.3rem;cursor:pointer;transition:all 0.3s;display:inline-flex;align-items:center;gap:10px;box-shadow:0 4px 15px rgba(107,184,176,0.3)}.btn-download:hover:not(:disabled){transform:translateY(-3px) scale(1.02);box-shadow:0 8px 25px rgba(107,184,176,0.4)}.btn-download:disabled{opacity:0.6;cursor:not-allowed;transform:none}.btn-download svg{width:22px;height:22px;stroke:currentColor;fill:none}
+        .format-selector{display:flex;gap:10px;align-items:center;margin-top:15px;justify-content:center;flex-wrap:wrap}.format-btn{padding:8px 16px;border:2px solid var(--fog);background:white;border-radius:20px;font-family:'Caveat',cursive;font-size:1.1rem;color:var(--slate);cursor:pointer;transition:all 0.2s}.format-btn:hover{border-color:var(--seafoam)}.format-btn.active{border-color:var(--seafoam);background:var(--seafoam-wash);color:var(--seafoam)}.format-label{font-size:0.9rem;color:var(--stone)}.ffmpeg-note{font-size:0.8rem;color:var(--stone);text-align:center;margin-top:10px;font-style:italic}
+        .quote-area{margin-top:36px;padding:30px;background:linear-gradient(135deg,var(--seafoam-wash) 0%,var(--gold-wash) 35%,var(--blush-wash) 65%,var(--lavender-wash) 100%);border-radius:12px;text-align:center}.quote-area p{font-style:italic;color:var(--slate);font-size:1.05rem;line-height:1.8}
+        .celebration{position:fixed;top:-50px;font-size:28px;animation:celebrationFall 4s linear forwards;pointer-events:none;z-index:1000}@keyframes celebrationFall{to{transform:translateY(calc(100vh + 100px)) rotate(360deg);opacity:0}}.hidden{display:none!important}
+        .scrapbook-overlay{position:fixed;inset:0;background:rgba(30,40,50,0.92);z-index:9999;display:none;align-items:center;justify-content:center;perspective:2000px}.scrapbook-overlay.active{display:flex}.scrapbook-close{position:absolute;top:20px;right:30px;background:none;border:none;color:white;font-size:2.5rem;cursor:pointer;opacity:0.7;transition:opacity 0.2s;z-index:10001}.scrapbook-close:hover{opacity:1}.scrapbook-container{width:min(700px,95vw);height:min(500px,70vh);position:relative;transform-style:preserve-3d}.scrapbook-page{position:absolute;width:100%;height:100%;backface-visibility:hidden;transform-origin:left center;transition:transform 0.6s ease-in-out,box-shadow 0.6s ease-in-out;border-radius:0 12px 12px 0;overflow:hidden;box-shadow:2px 0 15px rgba(0,0,0,0.15);cursor:pointer;transform-style:preserve-3d}.scrapbook-page.flipped{transform:rotateY(-180deg);box-shadow:-2px 0 15px rgba(0,0,0,0.15)}.page-content{position:absolute;width:100%;height:100%;backface-visibility:hidden;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#fefefe 0%,#f9f6f0 100%);border-radius:0 12px 12px 0;overflow:hidden}.page-texture{position:absolute;inset:0;opacity:0.02;pointer-events:none}.page-spine{position:absolute;left:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,rgba(0,0,0,0.08) 0%,transparent 100%);pointer-events:none}.washi-tape{position:absolute;height:28px;opacity:0.8;border-radius:2px}.washi-tape.tape-1{top:20px;right:30px;width:80px;background:linear-gradient(90deg,var(--seafoam-soft),var(--seafoam));transform:rotate(12deg)}.washi-tape.tape-2{bottom:40px;left:20px;width:100px;background:linear-gradient(90deg,var(--blush),#e8b8b8);transform:rotate(-8deg)}.washi-tape.tape-3{top:50%;right:15px;width:70px;background:linear-gradient(90deg,var(--gold-soft),var(--gold));transform:rotate(25deg)}.washi-tape.tape-4{bottom:80px;right:40px;width:90px;background:linear-gradient(90deg,var(--lavender),#b8b4d4);transform:rotate(-15deg)}.page-title{font-family:'Caveat',cursive;font-size:2.5rem;color:var(--ink);margin-bottom:20px;text-align:center;position:relative}.page-title::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:80px;height:4px;background:linear-gradient(90deg,var(--seafoam),var(--gold),var(--blush));border-radius:2px}.big-stat{font-family:'Caveat',cursive;font-size:5rem;color:var(--gold);line-height:1;margin:15px 0;text-shadow:2px 2px 0 var(--gold-wash)}.stat-label{font-family:'Libre Baskerville',serif;font-size:1.1rem;color:var(--slate);font-style:italic}.fun-fact{background:var(--gold-wash);padding:15px 25px;border-radius:20px;font-family:'Caveat',cursive;font-size:1.3rem;color:var(--ink);margin-top:20px;text-align:center}.stamp{width:70px;height:70px;border:3px solid var(--blush);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Caveat',cursive;font-size:0.75rem;color:var(--blush);text-align:center;transform:rotate(-15deg);position:absolute}.destination-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}.dest-tag{background:white;padding:8px 16px;border-radius:20px;font-family:'Caveat',cursive;font-size:1.15rem;color:var(--slate);box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:4px solid var(--seafoam)}.dest-tag:nth-child(2n){border-left-color:var(--gold)}.dest-tag:nth-child(3n){border-left-color:var(--blush)}.mode-breakdown{display:flex;gap:15px;margin-top:25px;flex-wrap:wrap;justify-content:center}.mode-stat{text-align:center;padding:12px;background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);min-width:70px}.mode-stat svg{width:28px;height:28px;stroke:var(--slate);fill:none;margin-bottom:5px}.mode-stat .pct{font-family:'Caveat',cursive;font-size:1.4rem;color:var(--gold)}.mode-stat .lbl{font-size:0.7rem;color:var(--stone);text-transform:capitalize}.month-bars{display:flex;align-items:flex-end;justify-content:center;gap:10px;height:120px;margin-top:25px;width:100%;max-width:400px}.month-bar{width:28px;background:linear-gradient(180deg,var(--seafoam) 0%,var(--seafoam-soft) 100%);border-radius:4px 4px 0 0;min-height:10px;position:relative}.month-bar::after{content:attr(data-month);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:0.7rem;font-weight:500;color:var(--slate)}.memory-photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px;max-width:100%}.memory-photo{position:relative;background:white;padding:6px;box-shadow:0 3px 10px rgba(0,0,0,0.15)}.memory-photo:nth-child(odd){transform:rotate(-3deg)}.memory-photo:nth-child(even){transform:rotate(3deg)}.memory-photo:nth-child(3n){transform:rotate(-5deg)}.memory-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}.memory-photo-caption{font-family:'Caveat',cursive;font-size:0.7rem;color:var(--slate);text-align:center;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.closing-text{font-family:'Caveat',cursive;font-size:2rem;color:var(--ink);text-align:center;line-height:1.4}.closing-year{font-size:4rem;color:var(--gold);display:block;margin-top:10px}.sparkle{position:absolute;font-size:1.5rem;animation:sparkle 2s ease-in-out infinite}@keyframes sparkle{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}.nav-hint{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.6);font-size:0.85rem;font-style:italic}.page-number{position:absolute;bottom:15px;right:25px;font-family:'Caveat',cursive;font-size:1rem;color:var(--stone)}.cover-deco{position:absolute;opacity:0.2;font-size:2.5rem}.archetype-icon{font-size:5rem;margin:10px 0}.archetype-name{font-family:'Caveat',cursive;font-size:2.5rem;color:var(--gold);margin:10px 0}.archetype-desc{font-family:'Libre Baskerville',serif;font-size:1rem;color:var(--slate);text-align:center;max-width:300px;line-height:1.6;font-style:italic}.dna-bars{width:100%;max-width:340px;margin-top:20px;padding:0 10px;box-sizing:border-box}.dna-row{display:flex;align-items:center;gap:10px;margin:12px 0}.dna-label{font-family:'Caveat',cursive;font-size:1.1rem;color:var(--slate);min-width:95px;text-align:right;flex-shrink:0}.dna-bar-bg{flex:1;height:22px;background:var(--fog);border-radius:11px;overflow:hidden;min-width:100px}.dna-bar-fill{height:100%;border-radius:11px;transition:width 0.5s}.dna-bar-fill.explorer{background:linear-gradient(90deg,var(--seafoam),var(--seafoam-soft))}.dna-bar-fill.comfort{background:linear-gradient(90deg,var(--blush),#f0c4c4)}.dna-bar-fill.variety{background:linear-gradient(90deg,var(--gold),var(--gold-soft))}.dna-pct{font-family:'Caveat',cursive;font-size:1.2rem;color:var(--ink);min-width:40px;text-align:left}.top-mode-icon{font-size:6rem;margin:15px 0}.top-mode-name{font-family:'Caveat',cursive;font-size:2.2rem;color:var(--gold)}.mode-details{display:flex;flex-direction:column;gap:12px;margin-top:20px;width:100%;max-width:280px}.mode-detail-row{display:flex;align-items:center;gap:15px;padding:12px 18px;background:white;border-radius:15px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.mode-detail-icon{font-size:1.8rem}.mode-detail-name{flex:1;font-family:'Caveat',cursive;font-size:1.4rem;color:var(--slate)}.mode-detail-count{font-family:'Caveat',cursive;font-size:1.3rem;color:var(--gold)}
+        .recording-modal{position:fixed;inset:0;background:rgba(30,40,50,0.95);z-index:10000;display:none;align-items:center;justify-content:center;flex-direction:column}.recording-modal.active{display:flex}.recording-preview{max-width:90vw;max-height:60vh;background:#1a1a1a;border-radius:12px;overflow:hidden;margin-bottom:20px;display:flex;align-items:center;justify-content:center}.recording-preview canvas{max-width:100%;max-height:100%}.recording-status{color:white;font-family:'Caveat',cursive;font-size:1.5rem;margin-bottom:20px;display:flex;align-items:center;gap:10px}.recording-dot{width:12px;height:12px;background:#ff4444;border-radius:50%;animation:pulse 1s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}.recording-progress{width:300px;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden;margin-bottom:20px}.recording-progress-bar{height:100%;background:linear-gradient(90deg,var(--seafoam),var(--gold));width:0%;transition:width 0.3s}.recording-cancel{padding:12px 30px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);border-radius:25px;color:white;font-family:'Caveat',cursive;font-size:1.2rem;cursor:pointer;transition:all 0.3s}.recording-cancel:hover{background:rgba(255,255,255,0.2)}.format-info{color:rgba(255,255,255,0.6);font-size:0.9rem;margin-bottom:15px}
+        @media(max-width:640px){.logo{font-size:3.4rem}.form-row{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}.journal-page{padding:28px}.page-content{padding:25px}.page-title{font-size:2rem}.big-stat{font-size:3.5rem}.memory-photo-grid{grid-template-columns:repeat(3,1fr)}.wrapped-btn-area{flex-direction:column}.btn-wrapped,.btn-download{width:100%;justify-content:center}}
+    </style>
+</head>
+<body>
+    <div class="sky-background"><div class="sky-wash wash-pink"></div><div class="sky-wash wash-lavender"></div><div class="sky-wash wash-mint"></div><div class="cloud cloud-1"></div><div class="cloud cloud-2"></div></div>
+    <div class="container">
+        <header><h1 class="logo">Wanderbook</h1><p class="tagline">Every journey tells a story worth keeping</p></header>
+        <div class="journal-page">
+            <div class="section-header"><h2 class="section-title">Add a New Adventure</h2><div class="section-line"></div></div>
+            <div class="mode-picker">
+                <button class="mode-option active" data-mode="flight"><svg viewBox="0 0 30 30"><path d="M4 20L10 17L20 9L26 6L23 13L14 22L8 26L6 24L10 17L4 20Z"/></svg><span class="mode-label">Fly</span></button>
+                <button class="mode-option" data-mode="car"><svg viewBox="0 0 30 30"><path d="M3 16L6 10L10 8L20 8L24 10L27 16L27 21L3 21L3 16Z"/><circle cx="8" cy="21" r="3"/><circle cx="22" cy="21" r="3"/></svg><span class="mode-label">Drive</span></button>
+                <button class="mode-option" data-mode="train"><svg viewBox="0 0 30 30"><rect x="6" y="4" width="18" height="18" rx="4"/><line x1="6" y1="11" x2="24" y2="11"/><circle cx="11" cy="17" r="2"/><circle cx="19" cy="17" r="2"/></svg><span class="mode-label">Rail</span></button>
+                <button class="mode-option" data-mode="bus"><svg viewBox="0 0 30 30"><rect x="4" y="6" width="22" height="16" rx="3"/><line x1="4" y1="13" x2="26" y2="13"/><circle cx="9" cy="20" r="2.5"/><circle cx="21" cy="20" r="2.5"/></svg><span class="mode-label">Bus</span></button>
+                <button class="mode-option" data-mode="boat"><svg viewBox="0 0 30 30"><path d="M2 20Q9 16 15 20Q21 24 28 20"/><path d="M7 18L15 6L23 18"/><line x1="15" y1="6" x2="15" y2="18"/></svg><span class="mode-label">Sail</span></button>
+            </div>
+            <div class="toggle-field"><input type="checkbox" class="toggle-check" id="onewayCheck"><span class="toggle-text">One-way journey</span></div>
+            <div class="date-row">
+                <div class="form-field"><label>Departure</label><input type="date" id="startDate"></div>
+                <div class="date-connector" id="dateConnector"><svg viewBox="0 0 28 28"><path d="M5 14L23 14" stroke-width="1.5"/><path d="M17 8L23 14L17 20" stroke-width="1.5"/></svg></div>
+                <div class="form-field" id="returnField"><label>Return</label><input type="date" id="endDate"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-field"><label>From</label><div class="autocomplete-wrapper"><input type="text" id="from" placeholder="Paris, France" autocomplete="off"><div class="autocomplete-dropdown" id="fromDropdown"></div></div></div>
+                <div class="form-field"><label>To</label><div class="autocomplete-wrapper"><input type="text" id="to" placeholder="Barcelona, Spain" autocomplete="off"><div class="autocomplete-dropdown" id="toDropdown"></div></div></div>
+            </div>
+            <button class="btn-submit" id="addBtn"><span>Add to journal</span><svg viewBox="0 0 24 24"><path d="M17 3L21 7L8 20L4 20L4 16L17 3Z"/><path d="M14 6L18 10"/></svg></button>
+            <div id="errorMessage"></div>
+            <div class="entries-area"><h3 class="entries-title"><svg viewBox="0 0 24 24"><path d="M4 6L20 6"/><path d="M4 12L20 12"/><path d="M4 18L14 18"/></svg>Journey Entries</h3><div class="trips-container" id="entriesList"></div></div>
+        </div>
+        <div class="journal-page hidden" id="statsCard">
+            <div class="section-header"><h2 class="section-title">Your Story So Far</h2><div class="section-line"></div></div>
+            <div class="stats-row">
+                <div class="stat-box"><svg viewBox="0 0 28 28"><path d="M14 2L17 10L26 11L20 17L21 26L14 22L7 26L8 17L2 11L11 10L14 2Z"/></svg><div class="stat-num" id="totalTrips">0</div><div class="stat-text">Adventures</div></div>
+                <div class="stat-box"><svg viewBox="0 0 28 28"><path d="M3 14C3 8 8 3 14 3C20 3 25 8 25 14"/><path d="M3 14L9 10L14 16L20 8L25 14"/></svg><div class="stat-num" id="totalMiles">0</div><div class="stat-text">Miles</div></div>
+                <div class="stat-box"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11"/><path d="M3 14L25 14"/><ellipse cx="14" cy="14" rx="5" ry="11"/></svg><div class="stat-num" id="totalCountries">0</div><div class="stat-text">Countries</div></div>
+            </div>
+            <div class="places-area"><h3 class="places-heading">🗺️ Places Discovered</h3><div class="places-grid"><div class="places-card"><h4>🌍 Countries</h4><div class="places-list" id="countriesList"></div></div><div class="places-card"><h4>🏙️ Cities</h4><div class="places-list" id="citiesList"></div></div></div></div>
+            <div class="photos-area">
+                <div class="photos-header"><h3 class="photos-heading"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15L16 10L5 21"/></svg>Memory Wall Photos <span style="font-size:0.8rem;color:var(--stone);font-weight:normal">(Max: 8)</span></h3><div><span class="photo-count" id="photoCount">0 photos</span><button class="btn-upload" id="uploadBtn"><svg viewBox="0 0 24 24"><path d="M21 15V19C21 20 20 21 19 21H5C4 21 3 20 3 19V15"/><path d="M17 8L12 3L7 8"/><path d="M12 3L12 15"/></svg>Add Photos</button></div></div>
+                <input type="file" class="photo-input" id="photoInput" multiple accept="image/*">
+                <div id="photosContainer"><div class="photo-placeholder" id="photoPlaceholder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15L16 10L5 21"/></svg><p>Add photos for your Memory Wall!</p></div></div>
+            </div>
+            <div class="wrapped-btn-area">
+                <button class="btn-wrapped" id="wrappedBtn"><svg viewBox="0 0 24 24"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z"/></svg>View Travel Wrapped</button>
+                <button class="btn-download" id="downloadBtn"><svg viewBox="0 0 24 24"><path d="M21 15V19C21 20 20 21 19 21H5C4 21 3 20 3 19V15"/><path d="M7 10L12 15L17 10"/><path d="M12 15L12 3"/></svg>Download MP4</button>
+            </div>
+            <div class="format-selector">
+                <span class="format-label">Format:</span>
+                <button class="format-btn active" data-format="story">📱 Story (9:16)</button>
+                <button class="format-btn" data-format="square">⬜ Square (1:1)</button>
+                <button class="format-btn" data-format="landscape">🖥️ Landscape (16:9)</button>
+            </div>
+            <p class="ffmpeg-note" id="ffmpegNote">First download loads FFmpeg (~25MB) for MP4 conversion</p>
+            <div class="quote-area"><p id="magicQuote">"The world is a book, and those who do not travel read only one page."</p></div>
+        </div>
+    </div>
+    <div class="scrapbook-overlay" id="scrapbookOverlay"><button class="scrapbook-close" id="closeScrapbook">&times;</button><div class="scrapbook-container"><div class="scrapbook-book" id="scrapbookBook"></div></div><div class="nav-hint">← Click left to go back • Click right to continue → • ESC to close</div></div>
+    <div class="recording-modal" id="recordingModal"><div class="recording-preview" id="recordingPreview"><canvas id="recordingCanvas"></canvas></div><div class="format-info" id="formatInfo">Format: Story (1080×1920) - Perfect for Instagram Stories/Reels</div><div class="recording-status"><div class="recording-dot"></div><span id="recordingText">Preparing your video...</span></div><div class="recording-progress"><div class="recording-progress-bar" id="recordingProgress"></div></div><button class="recording-cancel" id="cancelRecording">Cancel</button></div>
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
+<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+<script>
+const { FFmpeg } = FFmpegWASM;
+const { fetchFile } = FFmpegUtil;
+let ffmpeg = null;
+let ffmpegLoaded = false;
+
+async function loadFFmpeg() {
+    if (ffmpegLoaded) return true;
+    const statusText = document.getElementById('recordingText');
+    const note = document.getElementById('ffmpegNote');
+    try {
+        statusText.textContent = 'Loading FFmpeg (~25MB)... First time only';
+        ffmpeg = new FFmpeg();
+        ffmpeg.on('progress', ({ progress }) => {
+            document.getElementById('recordingProgress').style.width = (progress * 30) + '%';
+        });
+        await ffmpeg.load({
+            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+            wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm'
+        });
+        ffmpegLoaded = true;
+        if (note) note.textContent = '✓ FFmpeg loaded - MP4 ready';
+        return true;
+    } catch (e) {
+        console.error('FFmpeg load failed:', e);
+        statusText.textContent = 'FFmpeg failed to load - downloading WebM instead';
+        return false;
+    }
+}
+
+async function convertToMp4(webmBlob) {
+    const statusText = document.getElementById('recordingText');
+    const progressBar = document.getElementById('recordingProgress');
+    try {
+        statusText.textContent = 'Converting to MP4...';
+        progressBar.style.width = '30%';
+        
+        const webmData = await fetchFile(webmBlob);
+        await ffmpeg.writeFile('input.webm', webmData);
+        
+        ffmpeg.on('progress', ({ progress }) => {
+            progressBar.style.width = (30 + progress * 70) + '%';
+            statusText.textContent = `Converting to MP4... ${Math.round(progress * 100)}%`;
+        });
+        
+        await ffmpeg.exec(['-i', 'input.webm', '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p', 'output.mp4']);
+        
+        const mp4Data = await ffmpeg.readFile('output.mp4');
+        const mp4Blob = new Blob([mp4Data.buffer], { type: 'video/mp4' });
+        
+        await ffmpeg.deleteFile('input.webm');
+        await ffmpeg.deleteFile('output.mp4');
+        
+        return mp4Blob;
+    } catch (e) {
+        console.error('MP4 conversion failed:', e);
+        statusText.textContent = 'Conversion failed - downloading WebM';
+        return null;
+    }
+}
+
+const CITIES=[{city:"New York",state:"New York",country:"United States",lat:40.7128,lon:-74.006},{city:"Los Angeles",state:"California",country:"United States",lat:34.0522,lon:-118.2437},{city:"Chicago",state:"Illinois",country:"United States",lat:41.8781,lon:-87.6298},{city:"Houston",state:"Texas",country:"United States",lat:29.7604,lon:-95.3698},{city:"Phoenix",state:"Arizona",country:"United States",lat:33.4484,lon:-112.074},{city:"Philadelphia",state:"Pennsylvania",country:"United States",lat:39.9526,lon:-75.1652},{city:"San Antonio",state:"Texas",country:"United States",lat:29.4241,lon:-98.4936},{city:"San Diego",state:"California",country:"United States",lat:32.7157,lon:-117.1611},{city:"Dallas",state:"Texas",country:"United States",lat:32.7767,lon:-96.797},{city:"San Jose",state:"California",country:"United States",lat:37.3382,lon:-121.8863},{city:"Austin",state:"Texas",country:"United States",lat:30.2672,lon:-97.7431},{city:"San Francisco",state:"California",country:"United States",lat:37.7749,lon:-122.4194},{city:"Seattle",state:"Washington",country:"United States",lat:47.6062,lon:-122.3321},{city:"Denver",state:"Colorado",country:"United States",lat:39.7392,lon:-104.9903},{city:"Washington",state:"D.C.",country:"United States",lat:38.9072,lon:-77.0369},{city:"Boston",state:"Massachusetts",country:"United States",lat:42.3601,lon:-71.0589},{city:"Nashville",state:"Tennessee",country:"United States",lat:36.1627,lon:-86.7816},{city:"Portland",state:"Oregon",country:"United States",lat:45.5152,lon:-122.6784},{city:"Las Vegas",state:"Nevada",country:"United States",lat:36.1699,lon:-115.1398},{city:"Atlanta",state:"Georgia",country:"United States",lat:33.749,lon:-84.388},{city:"Miami",state:"Florida",country:"United States",lat:25.7617,lon:-80.1918},{city:"Minneapolis",state:"Minnesota",country:"United States",lat:44.9778,lon:-93.265},{city:"New Orleans",state:"Louisiana",country:"United States",lat:29.9511,lon:-90.0715},{city:"Honolulu",state:"Hawaii",country:"United States",lat:21.3069,lon:-157.8583},{city:"Orlando",state:"Florida",country:"United States",lat:28.5383,lon:-81.3792},{city:"Paris",country:"France",lat:48.8566,lon:2.3522},{city:"Paris",state:"Texas",country:"United States",lat:33.6609,lon:-95.5555},{city:"London",country:"United Kingdom",lat:51.5074,lon:-0.1278},{city:"Manchester",country:"United Kingdom",lat:53.4808,lon:-2.2426},{city:"Edinburgh",country:"United Kingdom",lat:55.9533,lon:-3.1883},{city:"Berlin",country:"Germany",lat:52.52,lon:13.405},{city:"Munich",country:"Germany",lat:48.1351,lon:11.582},{city:"Frankfurt",country:"Germany",lat:50.1109,lon:8.6821},{city:"Madrid",country:"Spain",lat:40.4168,lon:-3.7038},{city:"Barcelona",country:"Spain",lat:41.3851,lon:2.1734},{city:"Seville",country:"Spain",lat:37.3891,lon:-5.9845},{city:"Rome",country:"Italy",lat:41.9028,lon:12.4964},{city:"Milan",country:"Italy",lat:45.4642,lon:9.19},{city:"Florence",country:"Italy",lat:43.7696,lon:11.2558},{city:"Venice",country:"Italy",lat:45.4408,lon:12.3155},{city:"Naples",country:"Italy",lat:40.8518,lon:14.2681},{city:"Lyon",country:"France",lat:45.764,lon:4.8357},{city:"Marseille",country:"France",lat:43.2965,lon:5.3698},{city:"Nice",country:"France",lat:43.7102,lon:7.262},{city:"Bordeaux",country:"France",lat:44.8378,lon:-0.5792},{city:"Amsterdam",country:"Netherlands",lat:52.3676,lon:4.9041},{city:"Brussels",country:"Belgium",lat:50.8503,lon:4.3517},{city:"Vienna",country:"Austria",lat:48.2082,lon:16.3738},{city:"Zurich",country:"Switzerland",lat:47.3769,lon:8.5417},{city:"Geneva",country:"Switzerland",lat:46.2044,lon:6.1432},{city:"Lisbon",country:"Portugal",lat:38.7223,lon:-9.1393},{city:"Porto",country:"Portugal",lat:41.1579,lon:-8.6291},{city:"Dublin",country:"Ireland",lat:53.3498,lon:-6.2603},{city:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683},{city:"Stockholm",country:"Sweden",lat:59.3293,lon:18.0686},{city:"Oslo",country:"Norway",lat:59.9139,lon:10.7522},{city:"Helsinki",country:"Finland",lat:60.1699,lon:24.9384},{city:"Warsaw",country:"Poland",lat:52.2297,lon:21.0122},{city:"Prague",country:"Czech Republic",lat:50.0755,lon:14.4378},{city:"Budapest",country:"Hungary",lat:47.4979,lon:19.0402},{city:"Athens",country:"Greece",lat:37.9838,lon:23.7275},{city:"Santorini",country:"Greece",lat:36.3932,lon:25.4615},{city:"Dubrovnik",country:"Croatia",lat:42.6507,lon:18.0944},{city:"Split",country:"Croatia",lat:43.5081,lon:16.4402},{city:"Istanbul",country:"Turkey",lat:41.0082,lon:28.9784},{city:"Reykjavik",country:"Iceland",lat:64.1466,lon:-21.9426},{city:"Moscow",country:"Russia",lat:55.7558,lon:37.6173},{city:"Tokyo",country:"Japan",lat:35.6762,lon:139.6503},{city:"Osaka",country:"Japan",lat:34.6937,lon:135.5023},{city:"Kyoto",country:"Japan",lat:35.0116,lon:135.7681},{city:"Beijing",country:"China",lat:39.9042,lon:116.4074},{city:"Shanghai",country:"China",lat:31.2304,lon:121.4737},{city:"Hong Kong",country:"Hong Kong",lat:22.3193,lon:114.1694},{city:"Taipei",country:"Taiwan",lat:25.033,lon:121.5654},{city:"Seoul",country:"South Korea",lat:37.5665,lon:126.978},{city:"Singapore",country:"Singapore",lat:1.3521,lon:103.8198},{city:"Bangkok",country:"Thailand",lat:13.7563,lon:100.5018},{city:"Phuket",country:"Thailand",lat:7.8804,lon:98.3923},{city:"Kuala Lumpur",country:"Malaysia",lat:3.139,lon:101.6869},{city:"Jakarta",country:"Indonesia",lat:-6.2088,lon:106.8456},{city:"Bali",country:"Indonesia",lat:-8.3405,lon:115.092},{city:"Manila",country:"Philippines",lat:14.5995,lon:120.9842},{city:"Hanoi",country:"Vietnam",lat:21.0278,lon:105.8342},{city:"Ho Chi Minh City",country:"Vietnam",lat:10.8231,lon:106.6297},{city:"Mumbai",country:"India",lat:19.076,lon:72.8777},{city:"Delhi",country:"India",lat:28.7041,lon:77.1025},{city:"Dubai",country:"United Arab Emirates",lat:25.2048,lon:55.2708},{city:"Abu Dhabi",country:"United Arab Emirates",lat:24.4539,lon:54.3773},{city:"Tel Aviv",country:"Israel",lat:32.0853,lon:34.7818},{city:"Cairo",country:"Egypt",lat:30.0444,lon:31.2357},{city:"Marrakech",country:"Morocco",lat:31.6295,lon:-7.9811},{city:"Cape Town",country:"South Africa",lat:-33.9249,lon:18.4241},{city:"Nairobi",country:"Kenya",lat:-1.2921,lon:36.8219},{city:"Toronto",country:"Canada",lat:43.6532,lon:-79.3832},{city:"Montreal",country:"Canada",lat:45.5017,lon:-73.5673},{city:"Vancouver",country:"Canada",lat:49.2827,lon:-123.1207},{city:"Mexico City",country:"Mexico",lat:19.4326,lon:-99.1332},{city:"Cancún",country:"Mexico",lat:21.1619,lon:-86.8515},{city:"Havana",country:"Cuba",lat:23.1136,lon:-82.3666},{city:"San Juan",country:"Puerto Rico",lat:18.4655,lon:-66.1057},{city:"Bogotá",country:"Colombia",lat:4.711,lon:-74.0721},{city:"Lima",country:"Peru",lat:-12.0464,lon:-77.0428},{city:"Buenos Aires",country:"Argentina",lat:-34.6037,lon:-58.3816},{city:"Santiago",country:"Chile",lat:-33.4489,lon:-70.6693},{city:"São Paulo",country:"Brazil",lat:-23.5505,lon:-46.6333},{city:"Rio de Janeiro",country:"Brazil",lat:-22.9068,lon:-43.1729},{city:"Sydney",country:"Australia",lat:-33.8688,lon:151.2093},{city:"Melbourne",country:"Australia",lat:-37.8136,lon:144.9631},{city:"Auckland",country:"New Zealand",lat:-36.8509,lon:174.7645},{city:"Fiji",country:"Fiji",lat:-17.7134,lon:178.065},{city:"Maldives",country:"Maldives",lat:3.2028,lon:73.2207}];
+let trips=[],travelMode='flight',selectedFrom=null,selectedTo=null,highlightIdx=-1,currentPage=0,totalPages=0,memoryPhotos=[],isRecording=false,recordingCancelled=false;
+let videoFormat='story'; // story (9:16), square (1:1), landscape (16:9)
+const formatDimensions={story:{w:1080,h:1920,label:'Story (1080×1920) - Instagram Stories/Reels/TikTok'},square:{w:1080,h:1080,label:'Square (1080×1080) - Instagram Feed'},landscape:{w:1920,h:1080,label:'Landscape (1920×1080) - YouTube/Twitter'}};
+const modeIcons={flight:'<path d="M4 20L10 17L20 9L26 6L23 13L14 22L8 26L6 24L10 17L4 20Z"/>',car:'<path d="M3 16L6 10L10 8L20 8L24 10L27 16L27 21L3 21L3 16Z"/><circle cx="8" cy="21" r="3"/><circle cx="22" cy="21" r="3"/>',train:'<rect x="6" y="4" width="18" height="18" rx="4"/><line x1="6" y1="11" x2="24" y2="11"/><circle cx="11" cy="17" r="2"/><circle cx="19" cy="17" r="2"/>',bus:'<rect x="4" y="6" width="22" height="16" rx="3"/><line x1="4" y1="13" x2="26" y2="13"/><circle cx="9" cy="20" r="2.5"/><circle cx="21" cy="20" r="2.5"/>',boat:'<path d="M2 20Q9 16 15 20Q21 24 28 20"/><path d="M7 18L15 6L23 18"/><line x1="15" y1="6" x2="15" y2="18"/>'};
+
+// Format selector
+document.querySelectorAll('.format-btn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.format-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');videoFormat=btn.dataset.format}});
+
+let apiSearchTimeout=null;
+
+// Search static cities (instant, works offline)
+function searchStaticCities(q){
+    if(q.length<2)return[];
+    const ql=q.toLowerCase();
+    return CITIES.filter(c=>c.city.toLowerCase().includes(ql)||c.country.toLowerCase().includes(ql)||(c.state&&c.state.toLowerCase().includes(ql))).slice(0,8).map(c=>({
+        lat:c.lat,lon:c.lon,city:c.city,country:c.country,state:c.state,
+        displayName:c.state?`${c.city}, ${c.state}, ${c.country}`:`${c.city}, ${c.country}`,
+        shortName:c.state?`${c.city}, ${c.state}`:`${c.city}, ${c.country}`,
+        fromApi:false
+    }));
+}
+
+// Search OpenStreetMap Nominatim API (free, no key required)
+async function searchApiCities(q){
+    try{
+        // Use GeoDB Cities API - free tier, CORS enabled
+        const response=await fetch(`https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${encodeURIComponent(q)}&limit=5&sort=-population`,{
+            headers:{
+                'X-RapidAPI-Key':'demo',  // Demo key for testing - limited requests
+                'X-RapidAPI-Host':'wft-geo-db.p.rapidapi.com'
+            }
+        });
+        
+        if(!response.ok){
+            console.log('GeoDB response not ok:',response.status);
+            // Fallback: try public GeoDB endpoint
+            const fallbackResponse=await fetch(`https://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${encodeURIComponent(q)}&limit=5&sort=-population`);
+            if(!fallbackResponse.ok)return[];
+            const fallbackData=await fallbackResponse.json();
+            return parseGeoDBResults(fallbackData);
+        }
+        
+        const data=await response.json();
+        return parseGeoDBResults(data);
+    }catch(e){
+        console.log('Primary API failed, trying fallback...',e);
+        try{
+            // Fallback to free GeoDB endpoint
+            const fallbackResponse=await fetch(`https://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${encodeURIComponent(q)}&limit=5&sort=-population`);
+            if(!fallbackResponse.ok)return[];
+            const fallbackData=await fallbackResponse.json();
+            return parseGeoDBResults(fallbackData);
+        }catch(e2){
+            console.log('All API attempts failed:',e2);
+            return[];
+        }
+    }
+}
+
+function parseGeoDBResults(data){
+    if(!data.data)return[];
+    console.log('API results:',data.data);
+    return data.data.map(r=>({
+        lat:r.latitude,lon:r.longitude,
+        city:r.city||r.name,
+        country:r.country,
+        state:r.region||'',
+        displayName:`${r.city||r.name}, ${r.region?r.region+', ':''}${r.country}`,
+        shortName:`${r.city||r.name}, ${r.country}`,
+        fromApi:true
+    })).filter(r=>r.city&&r.country);
+}
+
+// Combined search function - static first (instant), then API fallback
+function searchCities(q){return searchStaticCities(q)}
+function showResults(results,dropdown,input,setLoc,hIdx=-1){
+    dropdown.innerHTML=results.map((loc,i)=>`<div class="autocomplete-item${i===hIdx?' highlighted':''}${loc.fromApi?' api-result':''}" data-index="${i}"><svg viewBox="0 0 20 28"><path d="M10 1C5 1 1 5.5 1 10C1 16 10 27 10 27S19 16 19 10C19 5.5 15 1 10 1Z" stroke-width="1.5"/><circle cx="10" cy="10" r="3"/></svg><div><div class="city-name">${loc.city}${loc.fromApi?' 🌐':''}</div><div class="city-details">${loc.displayName}</div></div></div>`).join('');
+    dropdown.classList.add('show');
+    dropdown.querySelectorAll('.autocomplete-item').forEach((item,i)=>item.onclick=()=>{input.value=results[i].shortName;setLoc(results[i]);dropdown.classList.remove('show');highlightIdx=-1});
+    dropdown._results=results;dropdown._setLoc=setLoc;dropdown._input=input;
+}
+function setupAutocomplete(inputId,dropdownId,setLoc){
+    const input=document.getElementById(inputId),dropdown=document.getElementById(dropdownId);
+    let results=[];
+    
+    input.oninput=async function(){
+        highlightIdx=-1;
+        const q=this.value.trim();
+        if(q.length<2){dropdown.classList.remove('show');results=[];return}
+        
+        // First show static results immediately
+        results=searchStaticCities(q);
+        
+        // If we have static results, show them
+        if(results.length>=3){
+            showResults(results,dropdown,input,setLoc,highlightIdx);
+            return;
+        }
+        
+        // For partial results or no results, also search API
+        if(q.length>=3){
+            // Show what we have plus loading indicator
+            if(results.length>0){
+                showResults(results,dropdown,input,setLoc,highlightIdx);
+            }else{
+                dropdown.innerHTML='<div style="padding:16px;text-align:center;color:#8a9dad;font-style:italic">🔍 Searching worldwide...</div>';
+                dropdown.classList.add('show');
+            }
+            
+            clearTimeout(apiSearchTimeout);
+            apiSearchTimeout=setTimeout(async()=>{
+                console.log('=== API SEARCH START ===');
+                console.log('Calling API for:',q);
+                try{
+                    const apiResults=await searchApiCities(q);
+                    console.log('API returned:',apiResults.length,'results');
+                    console.log('Results:',apiResults);
+                    const existingCities=new Set(results.map(r=>(r.city+r.country).toLowerCase()));
+                    const newResults=apiResults.filter(r=>!existingCities.has((r.city+r.country).toLowerCase()));
+                    results=[...results,...newResults].slice(0,8);
+                    console.log('Final results count:',results.length);
+                    if(results.length>0){showResults(results,dropdown,input,setLoc,highlightIdx)}
+                    else{dropdown.innerHTML='<div style="padding:16px;text-align:center;color:#8a9dad;font-style:italic">No cities found</div>';dropdown.classList.add('show')}
+                }catch(err){
+                    console.log('Error in API timeout:',err);
+                    dropdown.innerHTML='<div style="padding:16px;text-align:center;color:#8a9dad;font-style:italic">Search failed</div>';dropdown.classList.add('show');
+                }
+                console.log('=== API SEARCH END ===');
+            },400);
+        }else if(results.length>0){
+            showResults(results,dropdown,input,setLoc,highlightIdx);
+        }else{
+            dropdown.innerHTML='<div style="padding:16px;text-align:center;color:#8a9dad;font-style:italic">Keep typing...</div>';
+            dropdown.classList.add('show');
+        }
+    };
+    
+    input.onkeydown=function(e){
+        const r=dropdown._results||results;
+        if(!dropdown.classList.contains('show')||!r.length)return;
+        if(e.key==='ArrowDown'){e.preventDefault();highlightIdx=(highlightIdx+1)%r.length;showResults(r,dropdown,input,setLoc,highlightIdx)}
+        else if(e.key==='ArrowUp'){e.preventDefault();highlightIdx=highlightIdx<=0?r.length-1:highlightIdx-1;showResults(r,dropdown,input,setLoc,highlightIdx)}
+        else if(e.key==='Enter'&&highlightIdx>=0){e.preventDefault();input.value=r[highlightIdx].shortName;setLoc(r[highlightIdx]);dropdown.classList.remove('show');highlightIdx=-1}
+        else if(e.key==='Escape'){dropdown.classList.remove('show');highlightIdx=-1}
+    };
+    document.addEventListener('click',e=>{if(!input.contains(e.target)&&!dropdown.contains(e.target)){dropdown.classList.remove('show');highlightIdx=-1}});
+}
+setupAutocomplete('from','fromDropdown',loc=>selectedFrom=loc);setupAutocomplete('to','toDropdown',loc=>selectedTo=loc);
+document.querySelectorAll('.mode-option').forEach(o=>o.onclick=()=>{document.querySelectorAll('.mode-option').forEach(x=>x.classList.remove('active'));o.classList.add('active');travelMode=o.dataset.mode});
+document.getElementById('onewayCheck').onchange=function(){document.getElementById('returnField').classList.toggle('hidden',this.checked);document.getElementById('dateConnector').classList.toggle('hidden',this.checked)};
+function calcDist(lat1,lon1,lat2,lon2){const R=3959,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180,a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)))}
+function getDistByMode(d,m){return Math.round(d*({flight:1,car:1.3,train:1.2,bus:1.35,boat:1.1}[m]||1.2))}
+function formatDate(ds){const d=new Date(ds+'T00:00:00'),m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${m[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`}
+function addTrip(){const sd=document.getElementById('startDate').value,ed=document.getElementById('endDate').value,ow=document.getElementById('onewayCheck').checked,fi=document.getElementById('from').value.trim(),ti=document.getElementById('to').value.trim(),err=document.getElementById('errorMessage');err.innerHTML='';if(!sd||!fi||!ti){err.innerHTML='<div class="error-msg">Please fill in all required fields</div>';return}if(!ow&&!ed){err.innerHTML='<div class="error-msg">Please select a return date</div>';return}let fl=selectedFrom,tl=selectedTo;if(!fl||!fl.shortName.toLowerCase().includes(fi.toLowerCase().split(',')[0])){const r=searchCities(fi);if(!r.length){err.innerHTML='<div class="error-msg">Could not find: '+fi+'</div>';return}fl=r[0]}if(!tl||!tl.shortName.toLowerCase().includes(ti.toLowerCase().split(',')[0])){const r=searchCities(ti);if(!r.length){err.innerHTML='<div class="error-msg">Could not find: '+ti+'</div>';return}tl=r[0]}const dist=getDistByMode(calcDist(fl.lat,fl.lon,tl.lat,tl.lon),travelMode),id=Date.now();trips.push({id,tripType:ow?'oneway':'roundtrip',isReturn:false,date:sd,from:fl.shortName,fromCity:fl.city,fromCountry:fl.country,to:tl.shortName,toCity:tl.city,toCountry:tl.country,distance:dist,mode:travelMode});if(!ow)trips.push({id,tripType:'roundtrip',isReturn:true,date:ed,from:tl.shortName,fromCity:tl.city,fromCountry:tl.country,to:fl.shortName,toCity:fl.city,toCountry:fl.country,distance:dist,mode:travelMode});trips.sort((a,b)=>new Date(a.date)-new Date(b.date));localStorage.setItem('wanderbookTrips',JSON.stringify(trips));updateDisplay();clearForm();celebrate()}
+document.getElementById('addBtn').onclick=addTrip;
+function clearForm(){['startDate','endDate','from','to'].forEach(id=>document.getElementById(id).value='');document.getElementById('onewayCheck').checked=false;document.getElementById('returnField').classList.remove('hidden');document.getElementById('dateConnector').classList.remove('hidden');document.getElementById('errorMessage').innerHTML='';selectedFrom=selectedTo=null}
+function celebrate(){const icons=['✨','🌟','💫','⭐','✈️','🗺️'];for(let i=0;i<8;i++)setTimeout(()=>{const el=document.createElement('div');el.className='celebration';el.textContent=icons[Math.floor(Math.random()*icons.length)];el.style.left=Math.random()*100+'%';document.body.appendChild(el);setTimeout(()=>el.remove(),4000)},i*120)}
+function deleteTrip(id){trips=trips.filter(t=>t.id!==id);localStorage.setItem('wanderbookTrips',JSON.stringify(trips));updateDisplay()}
+function updateDisplay(){const sc=document.getElementById('statsCard'),el=document.getElementById('entriesList');if(!trips.length){sc.classList.add('hidden');el.innerHTML='<div class="empty-state"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="30" stroke-dasharray="4 3"/><ellipse cx="40" cy="40" rx="30" ry="12"/><ellipse cx="40" cy="40" rx="12" ry="30"/></svg><p>Your journal awaits its first entry.<br/>Where will adventure take you?</p></div>';return}sc.classList.remove('hidden');const grp={};trips.forEach(t=>{if(!grp[t.id])grp[t.id]=[];grp[t.id].push(t)});el.innerHTML=Object.values(grp).map(g=>g.length>1?`<div class="trip-group"><div class="trip-group-header"><span class="trip-badge">Round Journey</span><button class="entry-remove" onclick="deleteTrip(${g[0].id})">×</button></div>${g.map(t=>card(t,false)).join('')}</div>`:card(g[0],true)).join('');updateStats();updatePhotosDisplay()}
+function card(t,del){return`<div class="entry-card"><div class="entry-mode"><svg viewBox="0 0 30 30">${modeIcons[t.mode]}</svg></div><div class="entry-info"><div class="entry-route">${t.from}<span class="arrow">→</span>${t.to}</div><div class="entry-date">${formatDate(t.date)}${t.isReturn?' · Return':''}</div></div><div class="entry-miles">${t.distance.toLocaleString()} mi</div>${del?`<button class="entry-remove" onclick="deleteTrip(${t.id})">×</button>`:''}</div>`}
+function updateStats(){const tot=trips.filter(t=>!t.isReturn).length,miles=trips.reduce((s,t)=>s+t.distance,0),countries=new Set(),cities=new Set();trips.forEach(t=>{if(!t.isReturn){countries.add(t.toCountry);cities.add(t.toCity+', '+t.toCountry)}});document.getElementById('totalTrips').textContent=tot;document.getElementById('totalMiles').textContent=miles.toLocaleString();document.getElementById('totalCountries').textContent=countries.size;const cc={},ci={};trips.forEach(t=>{if(!t.isReturn){cc[t.toCountry]=(cc[t.toCountry]||0)+1;ci[t.toCity+', '+t.toCountry]=(ci[t.toCity+', '+t.toCountry]||0)+1}});document.getElementById('countriesList').innerHTML=Object.entries(cc).sort((a,b)=>b[1]-a[1]).map(([p,c])=>`<span class="place-chip">${p} <span class="num">${c}×</span></span>`).join('');document.getElementById('citiesList').innerHTML=Object.entries(ci).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([p,c])=>`<span class="place-chip">${p} <span class="num">${c}×</span></span>`).join('');document.getElementById('magicQuote').textContent=[`"${miles.toLocaleString()} miles — that's ${(miles/238855).toFixed(3)} trips to the moon!"`,`"${tot} adventures logged, countless memories made."`][Math.floor(Math.random()*2)]}
+document.getElementById('uploadBtn').onclick=()=>document.getElementById('photoInput').click();document.getElementById('photoPlaceholder').onclick=()=>document.getElementById('photoInput').click();
+document.getElementById('photoInput').onchange=function(e){
+    Array.from(e.target.files).forEach(file=>{
+        if(memoryPhotos.length>=8)return; // Max 8 photos
+        if(file.type.startsWith('image/')){
+            const reader=new FileReader();
+            reader.onload=function(event){
+                if(memoryPhotos.length>=8)return; // Double check
+                // Compress image to reduce localStorage usage
+                const img=new Image();
+                img.onload=function(){
+                    if(memoryPhotos.length>=8)return;
+                    const canvas=document.createElement('canvas');
+                    const maxSize=400;
+                    let w=img.width,h=img.height;
+                    if(w>h){if(w>maxSize){h*=maxSize/w;w=maxSize}}
+                    else{if(h>maxSize){w*=maxSize/h;h=maxSize}}
+                    canvas.width=w;canvas.height=h;
+                    canvas.getContext('2d').drawImage(img,0,0,w,h);
+                    const compressed=canvas.toDataURL('image/jpeg',0.7);
+                    memoryPhotos.push({id:Date.now()+Math.random(),data:compressed,name:''});
+                    savePhotos();
+                    updatePhotosDisplay();
+                };
+                img.src=event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    this.value='';
+};
+function savePhotos(){try{localStorage.setItem('wanderbookPhotos',JSON.stringify(memoryPhotos))}catch(e){console.log('Storage full, photo kept in memory only')}}
+function deletePhoto(id){memoryPhotos=memoryPhotos.filter(p=>p.id!==id);savePhotos();updatePhotosDisplay()}
+let draggedPhoto=null,draggedIdx=-1;
+function updatePhotosDisplay(){
+    const container=document.getElementById('photosContainer');
+    document.getElementById('photoCount').textContent=`${memoryPhotos.length} photo${memoryPhotos.length!==1?'s':''}`;
+    if(memoryPhotos.length===0){
+        container.innerHTML='<div class="photo-placeholder" onclick="document.getElementById(\'photoInput\').click()"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15L16 10L5 21"/></svg><p>Add photos for your Memory Wall!</p></div>';
+    }else{
+        container.innerHTML=`<div class="photos-grid">${memoryPhotos.map((p,i)=>`<div class="photo-item" draggable="true" data-idx="${i}"><img src="${p.data}" alt="photo" draggable="false"><button class="photo-remove" onclick="event.stopPropagation();deletePhoto(${p.id})">×</button></div>`).join('')}</div>`;
+        // Add drag events
+        container.querySelectorAll('.photo-item').forEach(item=>{
+            item.addEventListener('dragstart',e=>{
+                draggedIdx=parseInt(item.dataset.idx);
+                draggedPhoto=item;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed='move';
+            });
+            item.addEventListener('dragend',()=>{
+                item.classList.remove('dragging');
+                draggedPhoto=null;draggedIdx=-1;
+                container.querySelectorAll('.photo-item').forEach(el=>el.classList.remove('drag-over'));
+            });
+            item.addEventListener('dragover',e=>{
+                e.preventDefault();
+                e.dataTransfer.dropEffect='move';
+                const targetIdx=parseInt(item.dataset.idx);
+                if(targetIdx!==draggedIdx){
+                    item.classList.add('drag-over');
+                }
+            });
+            item.addEventListener('dragleave',()=>{
+                item.classList.remove('drag-over');
+            });
+            item.addEventListener('drop',e=>{
+                e.preventDefault();
+                const targetIdx=parseInt(item.dataset.idx);
+                if(draggedIdx!==-1&&targetIdx!==draggedIdx){
+                    const [moved]=memoryPhotos.splice(draggedIdx,1);
+                    memoryPhotos.splice(targetIdx,0,moved);
+                    savePhotos();
+                    updatePhotosDisplay();
+                }
+            });
+        });
+    }
+}
+document.getElementById('wrappedBtn').onclick=openScrapbook;document.getElementById('closeScrapbook').onclick=closeScrapbook;
+function getStats(){const tot=trips.filter(t=>!t.isReturn).length,miles=trips.reduce((s,t)=>s+t.distance,0),countries=new Set(),cities=new Set(),modeCounts={},monthCounts={};trips.forEach(t=>{if(!t.isReturn){countries.add(t.toCountry);cities.add(t.toCity);modeCounts[t.mode]=(modeCounts[t.mode]||0)+1;monthCounts[new Date(t.date+'T00:00:00').getMonth()]=(monthCounts[new Date(t.date+'T00:00:00').getMonth()]||0)+1}});const cityRanking=Object.entries([...cities].reduce((a,c)=>{a[c]=trips.filter(t=>!t.isReturn&&t.toCity===c).length;return a},{})).sort((a,b)=>b[1]-a[1]);const topCity=cityRanking[0];const top3Cities=cityRanking.slice(0,3).map(c=>c[0]);const topCountry=Object.entries([...countries].reduce((a,c)=>{a[c]=trips.filter(t=>!t.isReturn&&t.toCountry===c).length;return a},{})).sort((a,b)=>b[1]-a[1])[0];const topMode=Object.entries(modeCounts).sort((a,b)=>b[1]-a[1])[0];return{tot,miles,countries:[...countries],cities:[...cities],modeCounts,monthCounts,topCity,top3Cities,topCountry,topMode}}
+function getTravelerArchetype(s){
+    const dominated=(mode,pct)=>s.modeCounts[mode]&&(s.modeCounts[mode]/s.tot)>=pct;
+    const hasMany=(arr,n)=>arr.length>=n;
+    const highMiles=s.miles>10000;
+    const manyTrips=s.tot>=12;
+    const fewTrips=s.tot<=4;
+    const hasRepeats=s.topCity&&s.topCity[1]>=3;
+    const monthsActive=Object.values(s.monthCounts).filter(c=>c>0).length;
+    const seasonal=monthsActive<=4;
+    const spreadOut=monthsActive>=8;
+    
+    if(dominated('flight',0.7)&&highMiles)return{icon:'🦅',name:'The Jet Setter',desc:'Sky-high miles and a passport full of stamps. You live for the thrill of takeoff!'};
+    if(dominated('car',0.6))return{icon:'🚗',name:'The Road Warrior',desc:"Windows down, music up. The journey matters as much as the destination."};
+    if(hasMany(s.countries,5))return{icon:'🌍',name:'The Globe Trotter',desc:'Borders are just lines on a map to you. The world is your playground!'};
+    if(hasRepeats)return{icon:'🎯',name:'The Loyal Returner',desc:'You know what you love and keep going back. Some places just feel like home.'};
+    if(spreadOut&&manyTrips)return{icon:'⚡',name:'The Spontaneous Spirit',desc:"Adventure calls year-round and you always answer. Life's too short to stay still!"};
+    if(seasonal)return{icon:'🌙',name:'The Seasonal Wanderer',desc:'You travel with intention, making the most of your favorite seasons.'};
+    if(fewTrips)return{icon:'🏠',name:'The Mindful Explorer',desc:'Quality over quantity. Each journey is carefully chosen and deeply meaningful.'};
+    return{icon:'✨',name:'The Adventurer',desc:'Every trip adds a new chapter to your story. Keep exploring!'};
+}
+
+function getTravelDNA(s){
+    const newPlaces=s.countries.length*20+s.cities.length*5;
+    const comfort=s.topCity?(s.topCity[1]-1)*15:0;
+    const variety=Object.keys(s.modeCounts).length*15;
+    const total=newPlaces+comfort+variety||1;
+    return{
+        explorer:Math.round((newPlaces/total)*100),
+        comfort:Math.round((comfort/total)*100),
+        variety:Math.round((variety/total)*100)
+    };
+}
+
+function genPages(){
+    const s=getStats(),ny=new Date().getFullYear()+1,cy=new Date().getFullYear();
+    const mn=['J','F','M','A','M','J','J','A','S','O','N','D'];
+    const modeNames={flight:'Flying',car:'Driving',train:'Rail',bus:'Bus',boat:'Sailing'};
+    const modeIcons2={flight:'✈️',car:'🚗',train:'🚂',bus:'🚌',boat:'⛵'};
+    const maxM=Math.max(...Object.values(s.monthCounts),1);
+    const archetype=getTravelerArchetype(s);
+    const dna=getTravelDNA(s);
+    const topModeEntry=s.topMode;
+    
+    // DNA anecdote based on highest trait
+    let dnaAnecdote='';
+    if(dna.explorer>=dna.comfort&&dna.explorer>=dna.variety){
+        dnaAnecdote='Your compass always points to somewhere new! 🧭';
+    }else if(dna.comfort>=dna.explorer&&dna.comfort>=dna.variety){
+        dnaAnecdote='You know the best spots and keep coming back! 🏡';
+    }else{
+        dnaAnecdote='You love mixing it up - planes, trains & automobiles! 🎨';
+    }
+    
+    let pageNum=1;
+    const pages=[
+        {title:'Cover',html:`<div class="page-content"><div class="page-texture"></div><div class="cover-deco" style="top:15%;left:15%">✈️</div><div class="cover-deco" style="bottom:20%;right:15%">🌍</div><div class="washi-tape tape-1"></div><div class="washi-tape tape-2"></div><h1 class="page-title" style="font-size:2.8rem;">Your ${cy}<br/>Travel Wrapped</h1><p style="font-style:italic;color:var(--slate);margin-top:20px;">A year of adventures</p></div>`},
+        
+        {title:'Adventures',html:`<div class="page-content"><div class="page-texture"></div><div class="stamp" style="top:25px;right:35px;">TRAVELED<br/>${cy}</div><h2 class="page-title">Adventures Taken</h2><div class="big-stat">${s.tot}</div><p class="stat-label">journeys this year</p><div class="fun-fact">~${(s.tot/12).toFixed(1)} trips/month! ✨</div><div class="page-number">${pageNum++}</div></div>`},
+        
+        {title:'Miles',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">Miles Traveled</h2><div class="big-stat">${s.miles.toLocaleString()}</div><p class="stat-label">miles across the globe</p><div class="fun-fact">${s.miles>24901?`Circled Earth ${(s.miles/24901).toFixed(1)}x! 🌍`:`${(24901-s.miles).toLocaleString()} more to circle Earth!`}</div><div class="page-number">${pageNum++}</div></div>`},
+        
+        {title:'TopMode',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">Your Go-To</h2>${topModeEntry?`<div class="top-mode-icon">${modeIcons2[topModeEntry[0]]||'🚀'}</div><div class="top-mode-name">You love ${modeNames[topModeEntry[0]]||topModeEntry[0]}!</div><p class="stat-label">${Math.round(topModeEntry[1]/s.tot*100)}% of your trips</p>`:'<p>Add trips to see your favorite mode!</p>'}<div class="page-number">${pageNum++}</div></div>`},
+        
+        {title:'ModeDetails',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">The Full Picture</h2><div class="mode-details">${Object.entries(s.modeCounts).map(([m,c])=>`<div class="mode-detail-row"><span class="mode-detail-icon">${modeIcons2[m]||'🚀'}</span><span class="mode-detail-name">${modeNames[m]||m}</span><span class="mode-detail-count">${c} trip${c>1?'s':''}</span></div>`).join('')}</div><div class="page-number">${pageNum++}</div></div>`},
+        
+        {title:'Favorite',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">Cities Explored</h2><div class="big-stat">${s.cities.length}</div><p class="stat-label">favorite spots</p><p style="font-family:'Caveat',cursive;font-size:1.1rem;color:var(--stone);margin-top:20px;margin-bottom:8px">Most visited:</p><div class="destination-grid" style="margin-top:0">${s.top3Cities.map(c=>`<div class="dest-tag">${c}</div>`).join('')}</div>${s.topCountry?`<div class="fun-fact">Top country: ${s.topCountry[0]} 🎉</div>`:''}<div class="page-number">${pageNum++}</div></div>`},
+        
+        {title:'Countries',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">Countries Explored</h2><div class="big-stat">${s.countries.length}</div><p class="stat-label">passport stamps</p><div class="destination-grid">${s.countries.map(c=>`<div class="dest-tag">${c}</div>`).join('')}</div><div class="page-number">${pageNum++}</div></div>`},
+        
+        {title:'Monthly',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">When You Wandered</h2><p class="stat-label">Your travel calendar</p><div class="month-bars">${mn.map((m,i)=>{const c=s.monthCounts[i]||0,h=c>0?Math.max(15,(c/maxM)*90):10;return`<div class="month-bar" style="height:${h}px;${c===0?'opacity:0.35;':''}" data-month="${m}"></div>`}).join('')}</div><div class="page-number">${pageNum++}</div></div>`}
+    ];
+    
+    if(memoryPhotos.length>0){
+        pages.push({title:'Memory',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">Memory Wall</h2><div class="memory-photo-grid">${memoryPhotos.slice(0,8).map(p=>`<div class="memory-photo"><img src="${p.data}" alt="memory"></div>`).join('')}</div><div class="page-number">${pageNum++}</div></div>`});
+    }
+    
+    // DNA page (second to last)
+    pages.push({title:'DNA',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">Your Travel DNA</h2><div class="dna-bars"><div class="dna-row"><span class="dna-label">🧭 Explorer</span><div class="dna-bar-bg"><div class="dna-bar-fill explorer" style="width:${dna.explorer}%"></div></div><span class="dna-pct">${dna.explorer}%</span></div><div class="dna-row"><span class="dna-label">🏡 Comfort</span><div class="dna-bar-bg"><div class="dna-bar-fill comfort" style="width:${dna.comfort}%"></div></div><span class="dna-pct">${dna.comfort}%</span></div><div class="dna-row"><span class="dna-label">🎨 Variety</span><div class="dna-bar-bg"><div class="dna-bar-fill variety" style="width:${dna.variety}%"></div></div><span class="dna-pct">${dna.variety}%</span></div></div><p style="font-family:'Caveat',cursive;font-size:1.3rem;color:var(--ink);margin-top:20px;text-align:center;background:rgba(212,168,75,0.15);padding:12px 20px;border-radius:20px;display:inline-block">${dnaAnecdote}</p><div class="page-number">${pageNum++}</div></div>`});
+    
+    // Archetype page (last before closing)
+    pages.push({title:'Archetype',html:`<div class="page-content"><div class="page-texture"></div><h2 class="page-title">You Are...</h2><div class="archetype-icon">${archetype.icon}</div><div class="archetype-name">${archetype.name}</div><p class="archetype-desc">${archetype.desc}</p><div class="page-number">${pageNum++}</div></div>`});
+    
+    // Closing page
+    pages.push({title:'Closing',html:`<div class="page-content"><div class="page-texture"></div><div class="sparkle" style="top:20%;left:20%;">✨</div><div class="sparkle" style="top:30%;right:25%;animation-delay:0.5s;">💫</div><div class="sparkle" style="bottom:30%;left:30%;animation-delay:1s;">⭐</div><div class="sparkle" style="bottom:25%;right:20%;animation-delay:1.5s;">🌟</div><div class="washi-tape tape-2"></div><div class="washi-tape tape-4"></div><div class="closing-text">Here's to more adventures in<span class="closing-year">${ny}</span></div><div class="page-number">✦</div></div>`});
+    
+    return pages;
+}
+function openScrapbook(){if(!trips.length)return;const ov=document.getElementById('scrapbookOverlay'),bk=document.getElementById('scrapbookBook'),pgs=genPages();totalPages=pgs.length;currentPage=0;bk.innerHTML=pgs.map((p,i)=>`<div class="scrapbook-page" data-page="${i}" style="z-index:${totalPages-i};">${p.html}</div>`).join('');ov.classList.add('active');document.body.style.overflow='hidden';ov.onclick=handleFlip;document.onkeydown=handleKey}
+function closeScrapbook(){const ov=document.getElementById('scrapbookOverlay');ov.classList.remove('active');document.body.style.overflow='';ov.onclick=null;document.onkeydown=null}
+function handleFlip(e){
+    if(e.target.closest('.scrapbook-close'))return;
+    const container=document.querySelector('.scrapbook-container');
+    const rect=container.getBoundingClientRect();
+    const clickX=e.clientX-rect.left;
+    const midpoint=rect.width/2;
+    if(clickX<midpoint){flipPrev()}else{flipNext()}
+}
+function handleKey(e){if(['ArrowRight','ArrowDown',' '].includes(e.key)){e.preventDefault();flipNext()}else if(['ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();flipPrev()}else if(e.key==='Escape')closeScrapbook()}
+function flipNext(){if(currentPage>=totalPages-1){closeScrapbook();return}const pg=document.querySelector(`.scrapbook-page[data-page="${currentPage}"]`);if(pg){pg.classList.add('flipped');currentPage++}}
+function flipPrev(){if(currentPage<=0)return;currentPage--;const pg=document.querySelector(`.scrapbook-page[data-page="${currentPage}"]`);if(pg)pg.classList.remove('flipped')}
+
+// Video Recording with Instagram-friendly formats
+document.getElementById('downloadBtn').onclick=startVideoRecording;
+document.getElementById('cancelRecording').onclick=()=>{recordingCancelled=true};
+
+async function startVideoRecording(){
+    if(!trips.length)return;
+    const modal=document.getElementById('recordingModal'),canvas=document.getElementById('recordingCanvas'),ctx=canvas.getContext('2d'),progressBar=document.getElementById('recordingProgress'),statusText=document.getElementById('recordingText'),downloadBtn=document.getElementById('downloadBtn'),formatInfo=document.getElementById('formatInfo');
+    const fmt=formatDimensions[videoFormat];
+    canvas.width=fmt.w;canvas.height=fmt.h;
+    formatInfo.textContent=`Format: ${fmt.label}`;
+    downloadBtn.disabled=true;modal.classList.add('active');isRecording=true;recordingCancelled=false;
+    const pages=genPages(),pageTime=3000,fps=30,totalDuration=pages.length*pageTime;
+    const stream=canvas.captureStream(fps);
+    let mediaRecorder;
+    try{mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9',videoBitsPerSecond:8000000})}catch(e){try{mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm'})}catch(e2){alert('Video recording not supported');modal.classList.remove('active');downloadBtn.disabled=false;return}}
+    const chunks=[];
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
+    mediaRecorder.onstop=async()=>{
+        if(!recordingCancelled&&chunks.length>0){
+            const webmBlob=new Blob(chunks,{type:'video/webm'});
+            
+            // Try to convert to MP4
+            const canConvert = await loadFFmpeg();
+            if(canConvert){
+                const mp4Blob = await convertToMp4(webmBlob);
+                if(mp4Blob){
+                    const url=URL.createObjectURL(mp4Blob);
+                    const a=document.createElement('a');
+                    a.href=url;
+                    a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.mp4`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }else{
+                    // Fallback to WebM
+                    const url=URL.createObjectURL(webmBlob);
+                    const a=document.createElement('a');
+                    a.href=url;
+                    a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.webm`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+            }else{
+                // Fallback to WebM
+                const url=URL.createObjectURL(webmBlob);
+                const a=document.createElement('a');
+                a.href=url;
+                a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.webm`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+        modal.classList.remove('active');
+        downloadBtn.disabled=false;
+        isRecording=false;
+    };
+    mediaRecorder.start();statusText.textContent='Recording your Travel Wrapped...';
+    const s=getStats(),cy=new Date().getFullYear(),ny=cy+1;
+    const W=canvas.width,H=canvas.height,scale=videoFormat==='story'?1.5:1;
+    
+    // Preload photos
+    const loadedPhotos=[];
+    for(const photo of memoryPhotos.slice(0,8)){
+        const img=new Image();img.src=photo.data;
+        await new Promise(r=>{img.onload=r;img.onerror=r});
+        loadedPhotos.push({img,name:photo.name});
+    }
+    
+    for(let pageIdx=0;pageIdx<pages.length;pageIdx++){
+        if(recordingCancelled)break;
+        const page=pages[pageIdx];statusText.textContent=`Recording page ${pageIdx+1}/${pages.length}...`;
+        const startTime=Date.now();
+        const isCover=page.title==='Cover';
+        const isClosing=page.title==='Closing';
+        
+        while(Date.now()-startTime<pageTime){
+            if(recordingCancelled)break;
+            const progress=(pageIdx*pageTime+(Date.now()-startTime))/(totalDuration);
+            progressBar.style.width=(progress*100)+'%';
+            
+            // Background gradient
+            const bgGrad=ctx.createLinearGradient(0,0,0,H);
+            bgGrad.addColorStop(0,'#e8f4fc');bgGrad.addColorStop(0.5,'#d4ebf7');bgGrad.addColorStop(1,'#e8f4fc');
+            ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
+            
+            // Subtle color washes
+            ctx.globalAlpha=0.3;
+            ctx.fillStyle='#f5e1e9';ctx.beginPath();ctx.arc(W*0.1,H*0.8,W*0.25,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='#e8e4f3';ctx.beginPath();ctx.arc(W*0.85,H*0.2,W*0.2,0,Math.PI*2);ctx.fill();
+            ctx.globalAlpha=1;
+            
+            // Page card dimensions
+            const pw=W*0.85,ph=videoFormat==='story'?H*0.7:H*0.8,px=(W-pw)/2,py=(H-ph)/2;
+            
+            // Draw page card
+            ctx.shadowColor='rgba(0,0,0,0.15)';ctx.shadowBlur=40;ctx.shadowOffsetY=15;
+            const pageGrad=ctx.createLinearGradient(px,py,px+pw,py+ph);
+            pageGrad.addColorStop(0,'#fefefe');pageGrad.addColorStop(1,'#f9f6f0');
+            ctx.fillStyle=pageGrad;ctx.beginPath();ctx.roundRect(px,py,pw,ph,20);ctx.fill();
+            ctx.shadowColor='transparent';
+            
+            // COVER AND CLOSING ONLY: Add book-style decorations
+            if(isCover||isClosing){
+                // Page spine effect
+                const spineGrad=ctx.createLinearGradient(px,py,px+40,py);
+                spineGrad.addColorStop(0,'rgba(0,0,0,0.06)');spineGrad.addColorStop(1,'transparent');
+                ctx.fillStyle=spineGrad;ctx.fillRect(px,py,40,ph);
+                
+                // Washi tape decorations
+                function drawTape(x,y,w,angle,c1,c2){ctx.save();ctx.translate(x,y);ctx.rotate(angle*Math.PI/180);const g=ctx.createLinearGradient(0,0,w,0);g.addColorStop(0,c1);g.addColorStop(1,c2);ctx.globalAlpha=0.8;ctx.fillStyle=g;ctx.fillRect(-w/2,-15*scale,w,30*scale);ctx.restore()}
+                drawTape(px+pw-60*scale,py+40*scale,80*scale,12,'#8fccc6','#6bb8b0');
+                drawTape(px+70*scale,py+ph-50*scale,100*scale,-8,'#d4a5a5','#e8b8b8');
+            }else{
+                // INTERIOR PAGES: Simple top accent line
+                const accentGrad=ctx.createLinearGradient(px+40,py,px+pw-40,py);
+                accentGrad.addColorStop(0,'transparent');
+                accentGrad.addColorStop(0.2,'#6bb8b0');
+                accentGrad.addColorStop(0.5,'#d4a84b');
+                accentGrad.addColorStop(0.8,'#d4a5a5');
+                accentGrad.addColorStop(1,'transparent');
+                ctx.fillStyle=accentGrad;
+                ctx.fillRect(px+40,py,pw-80,4);
+            }
+            
+            const cx=W/2,cy_=H/2;
+            ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#3a4a58';
+            
+            switch(page.title){
+                case'Cover':
+                    // Decorative emojis
+                    ctx.globalAlpha=0.15;ctx.font=`${80*scale}px Arial`;ctx.fillText('✈️',px+100*scale,py+100*scale);ctx.fillText('🌍',px+pw-100*scale,py+ph-100*scale);ctx.globalAlpha=1;
+                    // Title
+                    ctx.font=`bold ${72*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText(`Your ${cy}`,cx,cy_-50*scale);ctx.fillText('Travel Wrapped',cx,cy_+40*scale);
+                    ctx.font=`italic ${24*scale}px Georgia,serif`;ctx.fillStyle='#8a9dad';ctx.fillText('A year of adventures',cx,cy_+120*scale);
+                    break;
+                case'Archetype':
+                    const arch=getTravelerArchetype(s);
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('You Are...',cx,cy_-180*scale);
+                    ctx.font=`${120*scale}px Arial`;ctx.fillText(arch.icon,cx,cy_-60*scale);
+                    ctx.font=`bold ${56*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(arch.name,cx,cy_+50*scale);
+                    ctx.font=`italic ${22*scale}px Georgia,serif`;ctx.fillStyle='#5a7084';
+                    const words=arch.desc.split(' ');let line='';let ly=cy_+120*scale;
+                    words.forEach(w=>{const test=line+w+' ';if(ctx.measureText(test).width>pw*0.8){ctx.fillText(line.trim(),cx,ly);ly+=30*scale;line=w+' '}else{line=test}});
+                    if(line)ctx.fillText(line.trim(),cx,ly);
+                    break;
+                case'DNA':
+                    const dnaData=getTravelDNA(s);
+                    let dnaText='';
+                    if(dnaData.explorer>=dnaData.comfort&&dnaData.explorer>=dnaData.variety){
+                        dnaText='Your compass always points to somewhere new! 🧭';
+                    }else if(dnaData.comfort>=dnaData.explorer&&dnaData.comfort>=dnaData.variety){
+                        dnaText='You know the best spots and keep coming back! 🏡';
+                    }else{
+                        dnaText='You love mixing it up - planes, trains & automobiles! 🎨';
+                    }
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('Your Travel DNA',cx,cy_-180*scale);
+                    const dnaBarW=220*scale,dnaBarH=32*scale,dnaLabelW=110*scale,dnaPctW=50*scale;
+                    const dnaTotalW=dnaLabelW+dnaBarW+dnaPctW;
+                    const dnaStartX=cx-dnaTotalW/2;
+                    const dnaBarX=dnaStartX+dnaLabelW;
+                    const dnaBarY=cy_-100*scale;
+                    [{label:'🧭 Explorer',pct:dnaData.explorer,color:'#6bb8b0'},{label:'🏡 Comfort',pct:dnaData.comfort,color:'#d4a5a5'},{label:'🎨 Variety',pct:dnaData.variety,color:'#d4a84b'}].forEach((d,i)=>{
+                        const y=dnaBarY+i*60*scale;
+                        // Label
+                        ctx.font=`${26*scale}px Caveat,cursive`;ctx.fillStyle='#5a7084';ctx.textAlign='right';
+                        ctx.fillText(d.label,dnaBarX-12*scale,y+dnaBarH/2+8*scale);
+                        // Bar background
+                        ctx.textAlign='center';
+                        ctx.fillStyle='rgba(0,0,0,0.08)';ctx.beginPath();ctx.roundRect(dnaBarX,y,dnaBarW,dnaBarH,dnaBarH/2);ctx.fill();
+                        // Bar fill
+                        ctx.fillStyle=d.color;ctx.beginPath();ctx.roundRect(dnaBarX,y,dnaBarW*d.pct/100,dnaBarH,dnaBarH/2);ctx.fill();
+                        // Percentage
+                        ctx.fillStyle='#3a4a58';ctx.font=`bold ${24*scale}px Caveat,cursive`;ctx.textAlign='left';
+                        ctx.fillText(`${d.pct}%`,dnaBarX+dnaBarW+12*scale,y+dnaBarH/2+8*scale);
+                        ctx.textAlign='center';
+                    });
+                    // Anecdote with background that covers full text
+                    ctx.font=`${24*scale}px Caveat,cursive`;
+                    const anecdoteWidth=ctx.measureText(dnaText).width+40*scale;
+                    ctx.fillStyle='rgba(212,168,75,0.15)';
+                    ctx.beginPath();ctx.roundRect(cx-anecdoteWidth/2,cy_+100*scale,anecdoteWidth,45*scale,22*scale);ctx.fill();
+                    ctx.fillStyle='#3a4a58';ctx.fillText(dnaText,cx,cy_+128*scale);
+                    break;
+                case'TopMode':
+                    const modeIcons3={flight:'✈️',car:'🚗',train:'🚂',bus:'🚌',boat:'⛵'};
+                    const modeNames2={flight:'Flying',car:'Driving',train:'Rail',bus:'Bus',boat:'Sailing'};
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('Your Go-To',cx,cy_-180*scale);
+                    if(s.topMode){
+                        ctx.font=`${120*scale}px Arial`;ctx.fillText(modeIcons3[s.topMode[0]]||'🚀',cx,cy_-60*scale);
+                        ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(`You love ${modeNames2[s.topMode[0]]||s.topMode[0]}!`,cx,cy_+40*scale);
+                        ctx.font=`italic ${26*scale}px Georgia,serif`;ctx.fillStyle='#5a7084';ctx.fillText(`${Math.round(s.topMode[1]/s.tot*100)}% of your trips`,cx,cy_+90*scale);
+                    }
+                    break;
+                case'ModeDetails':
+                    const modeIcons4={flight:'✈️',car:'🚗',train:'🚂',bus:'🚌',boat:'⛵'};
+                    const modeNames3={flight:'Flying',car:'Driving',train:'Rail',bus:'Bus',boat:'Sailing'};
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('The Full Picture',cx,cy_-180*scale);
+                    const entries=Object.entries(s.modeCounts);
+                    let mdy=cy_-100*scale;
+                    entries.forEach(([m,c])=>{
+                        ctx.fillStyle='white';ctx.shadowColor='rgba(0,0,0,0.08)';ctx.shadowBlur=10;
+                        ctx.beginPath();ctx.roundRect(cx-160*scale,mdy,320*scale,55*scale,28*scale);ctx.fill();
+                        ctx.shadowColor='transparent';
+                        ctx.font=`${40*scale}px Arial`;ctx.fillText(modeIcons4[m]||'🚀',cx-120*scale,mdy+32*scale);
+                        ctx.font=`${32*scale}px Caveat,cursive`;ctx.fillStyle='#5a7084';ctx.textAlign='left';ctx.fillText(modeNames3[m]||m,cx-70*scale,mdy+35*scale);
+                        ctx.fillStyle='#d4a84b';ctx.textAlign='right';ctx.fillText(`${c} trip${c>1?'s':''}`,cx+140*scale,mdy+35*scale);
+                        ctx.textAlign='center';ctx.fillStyle='#3a4a58';
+                        mdy+=65*scale;
+                    });
+                    break;
+                case'Adventures':
+                    // Stamp
+                    ctx.save();ctx.translate(px+pw-70*scale,py+70*scale);ctx.rotate(-15*Math.PI/180);
+                    ctx.strokeStyle='#d4a5a5';ctx.lineWidth=3*scale;ctx.beginPath();ctx.arc(0,0,45*scale,0,Math.PI*2);ctx.stroke();
+                    ctx.font=`bold ${14*scale}px Caveat,cursive`;ctx.fillStyle='#d4a5a5';ctx.fillText('TRAVELED',0,-8*scale);ctx.fillText(cy.toString(),0,12*scale);
+                    ctx.restore();
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('Adventures Taken',cx,cy_-180*scale);
+                    ctx.font=`bold ${140*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(s.tot.toString(),cx,cy_-40*scale);
+                    ctx.font=`italic ${26*scale}px Georgia,serif`;ctx.fillStyle='#5a7084';ctx.fillText('journeys this year',cx,cy_+60*scale);
+                    // Fun fact bubble
+                    ctx.fillStyle='rgba(107,184,176,0.15)';ctx.beginPath();ctx.roundRect(cx-180*scale,cy_+100*scale,360*scale,60*scale,30*scale);ctx.fill();
+                    ctx.font=`${28*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText(`~${(s.tot/12).toFixed(1)} trips per month! ✨`,cx,cy_+130*scale);
+                    break;
+                case'Miles':
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('Miles Traveled',cx,cy_-180*scale);
+                    ctx.font=`bold ${120*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(s.miles.toLocaleString(),cx,cy_-40*scale);
+                    ctx.font=`italic ${26*scale}px Georgia,serif`;ctx.fillStyle='#5a7084';ctx.fillText('miles across the globe',cx,cy_+60*scale);
+                    // Earth comparison
+                    const earthFact=s.miles>24901?`🌍 Circled Earth ${(s.miles/24901).toFixed(1)}x!`:`🌍 ${Math.round((s.miles/24901)*100)}% around Earth`;
+                    ctx.fillStyle='rgba(212,168,75,0.15)';ctx.beginPath();ctx.roundRect(cx-180*scale,cy_+100*scale,360*scale,60*scale,30*scale);ctx.fill();
+                    ctx.font=`${28*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText(earthFact,cx,cy_+130*scale);
+                    break;
+                case'Favorite':
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('Cities Explored',cx,cy_-180*scale);
+                    ctx.font=`bold ${140*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(s.cities.length.toString(),cx,cy_-40*scale);
+                    ctx.font=`italic ${26*scale}px Georgia,serif`;ctx.fillStyle='#5a7084';ctx.fillText('favorite spots',cx,cy_+50*scale);
+                    // Most visited label
+                    ctx.font=`${20*scale}px Caveat,cursive`;ctx.fillStyle='#8a9dad';ctx.fillText('Most visited:',cx,cy_+80*scale);
+                    // Top 3 cities tags
+                    const top3=s.top3Cities;
+                    const cityTagW=videoFormat==='story'?140*scale:120*scale,cityTagH=38*scale,cityTagGap=10*scale;
+                    const cityTotalW=top3.length*cityTagW+(top3.length-1)*cityTagGap;
+                    const cityStartX=cx-cityTotalW/2+cityTagW/2;
+                    top3.forEach((c,i)=>{
+                        const tx=cityStartX+i*(cityTagW+cityTagGap);
+                        ctx.fillStyle='white';ctx.shadowColor='rgba(0,0,0,0.08)';ctx.shadowBlur=6;
+                        ctx.beginPath();ctx.roundRect(tx-cityTagW/2,cy_+100*scale,cityTagW,cityTagH,cityTagH/2);ctx.fill();
+                        ctx.shadowColor='transparent';
+                        ctx.fillStyle=['#6bb8b0','#d4a84b','#d4a5a5'][i%3];
+                        ctx.fillRect(tx-cityTagW/2,cy_+100*scale,4*scale,cityTagH);
+                        ctx.font=`${22*scale}px Caveat,cursive`;ctx.fillStyle='#5a7084';ctx.fillText(c.length>12?c.slice(0,10)+'..':c,tx,cy_+123*scale);
+                    });
+                    // Top country fun fact
+                    if(s.topCountry){
+                        ctx.fillStyle='rgba(212,168,75,0.15)';ctx.beginPath();ctx.roundRect(cx-160*scale,cy_+155*scale,320*scale,50*scale,25*scale);ctx.fill();
+                        ctx.font=`${24*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText(`Top country: ${s.topCountry[0]} 🎉`,cx,cy_+181*scale);
+                    }
+                    break;
+                case'Countries':
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('Countries Explored',cx,cy_-180*scale);
+                    ctx.font=`bold ${140*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(s.countries.length.toString(),cx,cy_-40*scale);
+                    ctx.font=`italic ${26*scale}px Georgia,serif`;ctx.fillStyle='#5a7084';ctx.fillText('passport stamps',cx,cy_+50*scale);
+                    // Country tags - show all, wrap to multiple rows
+                    const allTags=s.countries;
+                    const tagW2=videoFormat==='story'?130*scale:110*scale,tagH2=36*scale,tagGap2=8*scale;
+                    const maxTagsPerRow=videoFormat==='story'?2:4;
+                    const tagRows=Math.ceil(allTags.length/maxTagsPerRow);
+                    const tagStartY=cy_+85*scale;
+                    allTags.forEach((c,i)=>{
+                        const row=Math.floor(i/maxTagsPerRow);
+                        const col=i%maxTagsPerRow;
+                        const tagsInRow=Math.min(maxTagsPerRow,allTags.length-row*maxTagsPerRow);
+                        const rowW=tagsInRow*tagW2+(tagsInRow-1)*tagGap2;
+                        const rowStartX=cx-rowW/2+tagW2/2;
+                        const tx=rowStartX+col*(tagW2+tagGap2);
+                        const ty=tagStartY+row*(tagH2+tagGap2);
+                        ctx.fillStyle='white';ctx.shadowColor='rgba(0,0,0,0.08)';ctx.shadowBlur=6;
+                        ctx.beginPath();ctx.roundRect(tx-tagW2/2,ty,tagW2,tagH2,tagH2/2);ctx.fill();
+                        ctx.shadowColor='transparent';
+                        ctx.fillStyle=['#6bb8b0','#d4a84b','#d4a5a5','#a8a4c9'][i%4];
+                        ctx.fillRect(tx-tagW2/2,ty,4*scale,tagH2);
+                        ctx.font=`${20*scale}px Caveat,cursive`;ctx.fillStyle='#5a7084';ctx.fillText(c.length>14?c.slice(0,12)+'..':c,tx,ty+tagH2/2+6*scale);
+                    });
+                    break;
+                case'Monthly':
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('When You Wandered',cx,cy_-180*scale);
+                    ctx.font=`italic ${22*scale}px Georgia,serif`;ctx.fillStyle='#5a7084';ctx.fillText('Your travel calendar',cx,cy_-135*scale);
+                    const mn=['J','F','M','A','M','J','J','A','S','O','N','D'],maxM=Math.max(...Object.values(s.monthCounts),1);
+                    const bw=50*scale,bMaxH=160*scale,bx=cx-mn.length*bw/2;
+                    const barBaseY=cy_+80*scale;
+                    mn.forEach((m,i)=>{
+                        const c=s.monthCounts[i]||0;
+                        const h=c>0?Math.max(20*scale,(c/maxM)*bMaxH):12*scale;
+                        const barGrad=ctx.createLinearGradient(0,barBaseY-h,0,barBaseY);
+                        barGrad.addColorStop(0,'#6bb8b0');barGrad.addColorStop(1,'#8fccc6');
+                        ctx.fillStyle=c>0?barGrad:'rgba(107,184,176,0.2)';
+                        ctx.beginPath();ctx.roundRect(bx+i*bw+6*scale,barBaseY-h,bw-12*scale,h,5*scale);ctx.fill();
+                        ctx.fillStyle='#8a9dad';ctx.font=`${16*scale}px sans-serif`;ctx.fillText(m,bx+i*bw+bw/2,barBaseY+20*scale);
+                    });
+                    break;
+                case'Memory':
+                    // Title at very top of page
+                    ctx.font=`bold ${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText('Memory Wall',cx,py+70*scale);
+                    // Photos grid - unchanged position
+                    const memCols=videoFormat==='story'?2:4,memRows=Math.ceil(loadedPhotos.length/memCols);
+                    const photoW=videoFormat==='story'?160*scale:140*scale;
+                    const photoH=photoW*3/4; // 4:3 aspect ratio
+                    const memGap=10*scale;
+                    const memGridW=memCols*photoW+(memCols-1)*memGap;
+                    const memGridH=memRows*photoH+(memRows-1)*memGap;
+                    const memGridX=cx-memGridW/2,memGridY=cy_-memGridH/2+30*scale;
+                    loadedPhotos.forEach((p,i)=>{
+                        const col=i%memCols,row=Math.floor(i/memCols);
+                        const x=memGridX+col*(photoW+memGap),y=memGridY+row*(photoH+memGap);
+                        ctx.save();ctx.translate(x+photoW/2,y+photoH/2);ctx.rotate((i%2===0?-2:2)*Math.PI/180);
+                        ctx.fillStyle='white';ctx.shadowColor='rgba(0,0,0,0.12)';ctx.shadowBlur=8;
+                        ctx.fillRect(-photoW/2-5*scale,-photoH/2-5*scale,photoW+10*scale,photoH+10*scale);
+                        ctx.shadowColor='transparent';
+                        // Draw image maintaining aspect ratio
+                        const imgAspect=p.img.width/p.img.height;
+                        const targetAspect=4/3;
+                        let sx=0,sy=0,sw=p.img.width,sh=p.img.height;
+                        if(imgAspect>targetAspect){
+                            sw=p.img.height*targetAspect;
+                            sx=(p.img.width-sw)/2;
+                        }else{
+                            sh=p.img.width/targetAspect;
+                            sy=(p.img.height-sh)/2;
+                        }
+                        ctx.drawImage(p.img,sx,sy,sw,sh,-photoW/2,-photoH/2,photoW,photoH);
+                        ctx.restore();
+                    });
+                    break;
+                case'Closing':
+                    // Sparkles
+                    ctx.font=`${28*scale}px Arial`;
+                    ['✨','💫','⭐','🌟'].forEach((e,i)=>{
+                        ctx.globalAlpha=0.5+Math.sin(Date.now()/500+i)*0.3;
+                        ctx.fillText(e,[px+80*scale,px+pw-100*scale,px+100*scale,px+pw-80*scale][i],[py+100*scale,py+150*scale,py+ph-150*scale,py+ph-100*scale][i]);
+                    });
+                    ctx.globalAlpha=1;
+                    ctx.font=`${48*scale}px Caveat,cursive`;ctx.fillStyle='#3a4a58';ctx.fillText("Here's to more adventures in",cx,cy_-30*scale);
+                    ctx.font=`bold ${130*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(ny.toString(),cx,cy_+90*scale);
+                    break;
+            }
+            await new Promise(r=>setTimeout(r,1000/fps));
+        }
+    }
+    mediaRecorder.stop();
+}
+
+const savedTrips=localStorage.getItem('wanderbookTrips');
+if(savedTrips){try{trips=JSON.parse(savedTrips)}catch(e){}}
+const savedPhotos=localStorage.getItem('wanderbookPhotos');if(savedPhotos)try{memoryPhotos=JSON.parse(savedPhotos)}catch(e){}
+updateDisplay();
+</script>
+</body>
+</html>
