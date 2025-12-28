@@ -88,73 +88,19 @@
                 <button class="format-btn" data-format="square">⬜ Square (1:1)</button>
                 <button class="format-btn" data-format="landscape">🖥️ Landscape (16:9)</button>
             </div>
-            <p class="ffmpeg-note" id="ffmpegNote">First download loads FFmpeg (~25MB) for MP4 conversion</p>
+            <p class="ffmpeg-note" id="ffmpegNote">Records directly to MP4 for Instagram</p>
             <div class="quote-area"><p id="magicQuote">"The world is a book, and those who do not travel read only one page."</p></div>
         </div>
     </div>
     <div class="scrapbook-overlay" id="scrapbookOverlay"><button class="scrapbook-close" id="closeScrapbook">&times;</button><div class="scrapbook-container"><div class="scrapbook-book" id="scrapbookBook"></div></div><div class="nav-hint">← Click left to go back • Click right to continue → • ESC to close</div></div>
     <div class="recording-modal" id="recordingModal"><div class="recording-preview" id="recordingPreview"><canvas id="recordingCanvas"></canvas></div><div class="format-info" id="formatInfo">Format: Story (1080×1920) - Perfect for Instagram Stories/Reels</div><div class="recording-status"><div class="recording-dot"></div><span id="recordingText">Preparing your video...</span></div><div class="recording-progress"><div class="recording-progress-bar" id="recordingProgress"></div></div><button class="recording-cancel" id="cancelRecording">Cancel</button></div>
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
-<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
 <script>
-const { FFmpeg } = FFmpegWASM;
-const { fetchFile } = FFmpegUtil;
-let ffmpeg = null;
-let ffmpegLoaded = false;
-
-async function loadFFmpeg() {
-    if (ffmpegLoaded) return true;
-    const statusText = document.getElementById('recordingText');
+// Check if VideoEncoder is supported
+const canEncodeMP4 = typeof VideoEncoder !== 'undefined';
+if (!canEncodeMP4) {
     const note = document.getElementById('ffmpegNote');
-    try {
-        statusText.textContent = 'Loading FFmpeg (~25MB)... First time only';
-        ffmpeg = new FFmpeg();
-        ffmpeg.on('progress', ({ progress }) => {
-            document.getElementById('recordingProgress').style.width = (progress * 30) + '%';
-        });
-        await ffmpeg.load({
-            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-            wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm'
-        });
-        ffmpegLoaded = true;
-        if (note) note.textContent = '✓ FFmpeg loaded - MP4 ready';
-        return true;
-    } catch (e) {
-        console.error('FFmpeg load failed:', e);
-        statusText.textContent = 'FFmpeg failed to load - downloading WebM instead';
-        return false;
-    }
-}
-
-async function convertToMp4(webmBlob) {
-    const statusText = document.getElementById('recordingText');
-    const progressBar = document.getElementById('recordingProgress');
-    try {
-        statusText.textContent = 'Converting to MP4...';
-        progressBar.style.width = '30%';
-        
-        const webmData = await fetchFile(webmBlob);
-        await ffmpeg.writeFile('input.webm', webmData);
-        
-        ffmpeg.on('progress', ({ progress }) => {
-            progressBar.style.width = (30 + progress * 70) + '%';
-            statusText.textContent = `Converting to MP4... ${Math.round(progress * 100)}%`;
-        });
-        
-        await ffmpeg.exec(['-i', 'input.webm', '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p', 'output.mp4']);
-        
-        const mp4Data = await ffmpeg.readFile('output.mp4');
-        const mp4Blob = new Blob([mp4Data.buffer], { type: 'video/mp4' });
-        
-        await ffmpeg.deleteFile('input.webm');
-        await ffmpeg.deleteFile('output.mp4');
-        
-        return mp4Blob;
-    } catch (e) {
-        console.error('MP4 conversion failed:', e);
-        statusText.textContent = 'Conversion failed - downloading WebM';
-        return null;
-    }
+    if (note) note.textContent = 'MP4 not supported in this browser - WebM will be used';
 }
 
 const CITIES=[{city:"New York",state:"New York",country:"United States",lat:40.7128,lon:-74.006},{city:"Los Angeles",state:"California",country:"United States",lat:34.0522,lon:-118.2437},{city:"Chicago",state:"Illinois",country:"United States",lat:41.8781,lon:-87.6298},{city:"Houston",state:"Texas",country:"United States",lat:29.7604,lon:-95.3698},{city:"Phoenix",state:"Arizona",country:"United States",lat:33.4484,lon:-112.074},{city:"Philadelphia",state:"Pennsylvania",country:"United States",lat:39.9526,lon:-75.1652},{city:"San Antonio",state:"Texas",country:"United States",lat:29.4241,lon:-98.4936},{city:"San Diego",state:"California",country:"United States",lat:32.7157,lon:-117.1611},{city:"Dallas",state:"Texas",country:"United States",lat:32.7767,lon:-96.797},{city:"San Jose",state:"California",country:"United States",lat:37.3382,lon:-121.8863},{city:"Austin",state:"Texas",country:"United States",lat:30.2672,lon:-97.7431},{city:"San Francisco",state:"California",country:"United States",lat:37.7749,lon:-122.4194},{city:"Seattle",state:"Washington",country:"United States",lat:47.6062,lon:-122.3321},{city:"Denver",state:"Colorado",country:"United States",lat:39.7392,lon:-104.9903},{city:"Washington",state:"D.C.",country:"United States",lat:38.9072,lon:-77.0369},{city:"Boston",state:"Massachusetts",country:"United States",lat:42.3601,lon:-71.0589},{city:"Nashville",state:"Tennessee",country:"United States",lat:36.1627,lon:-86.7816},{city:"Portland",state:"Oregon",country:"United States",lat:45.5152,lon:-122.6784},{city:"Las Vegas",state:"Nevada",country:"United States",lat:36.1699,lon:-115.1398},{city:"Atlanta",state:"Georgia",country:"United States",lat:33.749,lon:-84.388},{city:"Miami",state:"Florida",country:"United States",lat:25.7617,lon:-80.1918},{city:"Minneapolis",state:"Minnesota",country:"United States",lat:44.9778,lon:-93.265},{city:"New Orleans",state:"Louisiana",country:"United States",lat:29.9511,lon:-90.0715},{city:"Honolulu",state:"Hawaii",country:"United States",lat:21.3069,lon:-157.8583},{city:"Orlando",state:"Florida",country:"United States",lat:28.5383,lon:-81.3792},{city:"Paris",country:"France",lat:48.8566,lon:2.3522},{city:"Paris",state:"Texas",country:"United States",lat:33.6609,lon:-95.5555},{city:"London",country:"United Kingdom",lat:51.5074,lon:-0.1278},{city:"Manchester",country:"United Kingdom",lat:53.4808,lon:-2.2426},{city:"Edinburgh",country:"United Kingdom",lat:55.9533,lon:-3.1883},{city:"Berlin",country:"Germany",lat:52.52,lon:13.405},{city:"Munich",country:"Germany",lat:48.1351,lon:11.582},{city:"Frankfurt",country:"Germany",lat:50.1109,lon:8.6821},{city:"Madrid",country:"Spain",lat:40.4168,lon:-3.7038},{city:"Barcelona",country:"Spain",lat:41.3851,lon:2.1734},{city:"Seville",country:"Spain",lat:37.3891,lon:-5.9845},{city:"Rome",country:"Italy",lat:41.9028,lon:12.4964},{city:"Milan",country:"Italy",lat:45.4642,lon:9.19},{city:"Florence",country:"Italy",lat:43.7696,lon:11.2558},{city:"Venice",country:"Italy",lat:45.4408,lon:12.3155},{city:"Naples",country:"Italy",lat:40.8518,lon:14.2681},{city:"Lyon",country:"France",lat:45.764,lon:4.8357},{city:"Marseille",country:"France",lat:43.2965,lon:5.3698},{city:"Nice",country:"France",lat:43.7102,lon:7.262},{city:"Bordeaux",country:"France",lat:44.8378,lon:-0.5792},{city:"Amsterdam",country:"Netherlands",lat:52.3676,lon:4.9041},{city:"Brussels",country:"Belgium",lat:50.8503,lon:4.3517},{city:"Vienna",country:"Austria",lat:48.2082,lon:16.3738},{city:"Zurich",country:"Switzerland",lat:47.3769,lon:8.5417},{city:"Geneva",country:"Switzerland",lat:46.2044,lon:6.1432},{city:"Lisbon",country:"Portugal",lat:38.7223,lon:-9.1393},{city:"Porto",country:"Portugal",lat:41.1579,lon:-8.6291},{city:"Dublin",country:"Ireland",lat:53.3498,lon:-6.2603},{city:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683},{city:"Stockholm",country:"Sweden",lat:59.3293,lon:18.0686},{city:"Oslo",country:"Norway",lat:59.9139,lon:10.7522},{city:"Helsinki",country:"Finland",lat:60.1699,lon:24.9384},{city:"Warsaw",country:"Poland",lat:52.2297,lon:21.0122},{city:"Prague",country:"Czech Republic",lat:50.0755,lon:14.4378},{city:"Budapest",country:"Hungary",lat:47.4979,lon:19.0402},{city:"Athens",country:"Greece",lat:37.9838,lon:23.7275},{city:"Santorini",country:"Greece",lat:36.3932,lon:25.4615},{city:"Dubrovnik",country:"Croatia",lat:42.6507,lon:18.0944},{city:"Split",country:"Croatia",lat:43.5081,lon:16.4402},{city:"Istanbul",country:"Turkey",lat:41.0082,lon:28.9784},{city:"Reykjavik",country:"Iceland",lat:64.1466,lon:-21.9426},{city:"Moscow",country:"Russia",lat:55.7558,lon:37.6173},{city:"Tokyo",country:"Japan",lat:35.6762,lon:139.6503},{city:"Osaka",country:"Japan",lat:34.6937,lon:135.5023},{city:"Kyoto",country:"Japan",lat:35.0116,lon:135.7681},{city:"Beijing",country:"China",lat:39.9042,lon:116.4074},{city:"Shanghai",country:"China",lat:31.2304,lon:121.4737},{city:"Hong Kong",country:"Hong Kong",lat:22.3193,lon:114.1694},{city:"Taipei",country:"Taiwan",lat:25.033,lon:121.5654},{city:"Seoul",country:"South Korea",lat:37.5665,lon:126.978},{city:"Singapore",country:"Singapore",lat:1.3521,lon:103.8198},{city:"Bangkok",country:"Thailand",lat:13.7563,lon:100.5018},{city:"Phuket",country:"Thailand",lat:7.8804,lon:98.3923},{city:"Kuala Lumpur",country:"Malaysia",lat:3.139,lon:101.6869},{city:"Jakarta",country:"Indonesia",lat:-6.2088,lon:106.8456},{city:"Bali",country:"Indonesia",lat:-8.3405,lon:115.092},{city:"Manila",country:"Philippines",lat:14.5995,lon:120.9842},{city:"Hanoi",country:"Vietnam",lat:21.0278,lon:105.8342},{city:"Ho Chi Minh City",country:"Vietnam",lat:10.8231,lon:106.6297},{city:"Mumbai",country:"India",lat:19.076,lon:72.8777},{city:"Delhi",country:"India",lat:28.7041,lon:77.1025},{city:"Dubai",country:"United Arab Emirates",lat:25.2048,lon:55.2708},{city:"Abu Dhabi",country:"United Arab Emirates",lat:24.4539,lon:54.3773},{city:"Tel Aviv",country:"Israel",lat:32.0853,lon:34.7818},{city:"Cairo",country:"Egypt",lat:30.0444,lon:31.2357},{city:"Marrakech",country:"Morocco",lat:31.6295,lon:-7.9811},{city:"Cape Town",country:"South Africa",lat:-33.9249,lon:18.4241},{city:"Nairobi",country:"Kenya",lat:-1.2921,lon:36.8219},{city:"Toronto",country:"Canada",lat:43.6532,lon:-79.3832},{city:"Montreal",country:"Canada",lat:45.5017,lon:-73.5673},{city:"Vancouver",country:"Canada",lat:49.2827,lon:-123.1207},{city:"Mexico City",country:"Mexico",lat:19.4326,lon:-99.1332},{city:"Cancún",country:"Mexico",lat:21.1619,lon:-86.8515},{city:"Havana",country:"Cuba",lat:23.1136,lon:-82.3666},{city:"San Juan",country:"Puerto Rico",lat:18.4655,lon:-66.1057},{city:"Bogotá",country:"Colombia",lat:4.711,lon:-74.0721},{city:"Lima",country:"Peru",lat:-12.0464,lon:-77.0428},{city:"Buenos Aires",country:"Argentina",lat:-34.6037,lon:-58.3816},{city:"Santiago",country:"Chile",lat:-33.4489,lon:-70.6693},{city:"São Paulo",country:"Brazil",lat:-23.5505,lon:-46.6333},{city:"Rio de Janeiro",country:"Brazil",lat:-22.9068,lon:-43.1729},{city:"Sydney",country:"Australia",lat:-33.8688,lon:151.2093},{city:"Melbourne",country:"Australia",lat:-37.8136,lon:144.9631},{city:"Auckland",country:"New Zealand",lat:-36.8509,lon:174.7645},{city:"Fiji",country:"Fiji",lat:-17.7134,lon:178.065},{city:"Maldives",country:"Maldives",lat:3.2028,lon:73.2207}];
@@ -511,51 +457,7 @@ async function startVideoRecording(){
     canvas.width=fmt.w;canvas.height=fmt.h;
     formatInfo.textContent=`Format: ${fmt.label}`;
     downloadBtn.disabled=true;modal.classList.add('active');isRecording=true;recordingCancelled=false;
-    const pages=genPages(),pageTime=3000,fps=30,totalDuration=pages.length*pageTime;
-    const stream=canvas.captureStream(fps);
-    let mediaRecorder;
-    try{mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9',videoBitsPerSecond:8000000})}catch(e){try{mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm'})}catch(e2){alert('Video recording not supported');modal.classList.remove('active');downloadBtn.disabled=false;return}}
-    const chunks=[];
-    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
-    mediaRecorder.onstop=async()=>{
-        if(!recordingCancelled&&chunks.length>0){
-            const webmBlob=new Blob(chunks,{type:'video/webm'});
-            
-            // Try to convert to MP4
-            const canConvert = await loadFFmpeg();
-            if(canConvert){
-                const mp4Blob = await convertToMp4(webmBlob);
-                if(mp4Blob){
-                    const url=URL.createObjectURL(mp4Blob);
-                    const a=document.createElement('a');
-                    a.href=url;
-                    a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.mp4`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                }else{
-                    // Fallback to WebM
-                    const url=URL.createObjectURL(webmBlob);
-                    const a=document.createElement('a');
-                    a.href=url;
-                    a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.webm`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                }
-            }else{
-                // Fallback to WebM
-                const url=URL.createObjectURL(webmBlob);
-                const a=document.createElement('a');
-                a.href=url;
-                a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.webm`;
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-        }
-        modal.classList.remove('active');
-        downloadBtn.disabled=false;
-        isRecording=false;
-    };
-    mediaRecorder.start();statusText.textContent='Recording your Travel Wrapped...';
+    const pages=genPages(),pageTime=3000,fps=30;
     const s=getStats(),cy=new Date().getFullYear(),ny=cy+1;
     const W=canvas.width,H=canvas.height,scale=videoFormat==='story'?1.5:1;
     
@@ -567,16 +469,52 @@ async function startVideoRecording(){
         loadedPhotos.push({img,name:photo.name});
     }
     
+    // Try MP4 encoding with VideoEncoder + mp4-muxer
+    let useMP4=canEncodeMP4;
+    let muxer,encoder;
+    if(useMP4){
+        try{
+            muxer=new Mp4Muxer.Muxer({
+                target:new Mp4Muxer.ArrayBufferTarget(),
+                video:{codec:'avc',width:fmt.w,height:fmt.h},
+                fastStart:'in-memory'
+            });
+            encoder=new VideoEncoder({
+                output:(chunk,meta)=>{muxer.addVideoChunk(chunk,meta)},
+                error:e=>{console.error('Encode error:',e);useMP4=false;}
+            });
+            encoder.configure({codec:'avc1.640028',width:fmt.w,height:fmt.h,bitrate:5000000,framerate:fps});
+        }catch(e){
+            console.error('MP4 setup failed:',e);
+            useMP4=false;
+        }
+    }
+    
+    // WebM fallback setup
+    let mediaRecorder,chunks=[];
+    if(!useMP4){
+        const stream=canvas.captureStream(fps);
+        try{mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9',videoBitsPerSecond:8000000})}catch(e){try{mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm'})}catch(e2){alert('Video recording not supported');modal.classList.remove('active');downloadBtn.disabled=false;return}}
+        mediaRecorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
+        mediaRecorder.start();
+    }
+    
+    statusText.textContent=useMP4?'Encoding MP4...':'Recording video...';
+    let frameNum=0;
+    const totalFrames=pages.length*(pageTime/1000)*fps;
+    }
+    
     for(let pageIdx=0;pageIdx<pages.length;pageIdx++){
         if(recordingCancelled)break;
-        const page=pages[pageIdx];statusText.textContent=`Recording page ${pageIdx+1}/${pages.length}...`;
-        const startTime=Date.now();
+        const page=pages[pageIdx];
+        statusText.textContent=useMP4?`Encoding page ${pageIdx+1}/${pages.length}...`:`Recording page ${pageIdx+1}/${pages.length}...`;
         const isCover=page.title==='Cover';
         const isClosing=page.title==='Closing';
+        const framesThisPage=Math.floor(pageTime/1000*fps);
         
-        while(Date.now()-startTime<pageTime){
+        for(let frameInPage=0;frameInPage<framesThisPage;frameInPage++){
             if(recordingCancelled)break;
-            const progress=(pageIdx*pageTime+(Date.now()-startTime))/(totalDuration);
+            const progress=frameNum/totalFrames;
             progressBar.style.width=(progress*100)+'%';
             
             // Background gradient
@@ -844,10 +782,71 @@ async function startVideoRecording(){
                     ctx.font=`bold ${130*scale}px Caveat,cursive`;ctx.fillStyle='#d4a84b';ctx.fillText(ny.toString(),cx,cy_+90*scale);
                     break;
             }
-            await new Promise(r=>setTimeout(r,1000/fps));
+            
+            // For MP4: encode this frame
+            if(useMP4){
+                try{
+                    const frame=new VideoFrame(canvas,{timestamp:frameNum*1000000/fps});
+                    encoder.encode(frame,{keyFrame:frameInPage===0});
+                    frame.close();
+                }catch(e){console.error('Frame encode error:',e);}
+            }
+            frameNum++;
+            
+            // For WebM: wait real-time; For MP4: yield occasionally
+            if(useMP4){
+                if(frameNum%10===0)await new Promise(r=>setTimeout(r,0));
+            }else{
+                await new Promise(r=>setTimeout(r,1000/fps));
+            }
         }
     }
-    mediaRecorder.stop();
+    
+    // Finalize and download
+    if(!recordingCancelled){
+        if(useMP4){
+            try{
+                statusText.textContent='Finalizing MP4...';
+                await encoder.flush();
+                muxer.finalize();
+                const mp4Data=muxer.target.buffer;
+                const mp4Blob=new Blob([mp4Data],{type:'video/mp4'});
+                const url=URL.createObjectURL(mp4Blob);
+                const a=document.createElement('a');
+                a.href=url;
+                a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.mp4`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }catch(e){
+                console.error('MP4 finalize error:',e);
+                statusText.textContent='MP4 failed';
+            }
+        }else{
+            mediaRecorder.stop();
+            // WebM download happens in onstop handler
+            await new Promise(r=>{
+                const origStop=mediaRecorder.onstop;
+                mediaRecorder.onstop=async(e)=>{
+                    if(!recordingCancelled&&chunks.length>0){
+                        const webmBlob=new Blob(chunks,{type:'video/webm'});
+                        const url=URL.createObjectURL(webmBlob);
+                        const a=document.createElement('a');
+                        a.href=url;
+                        a.download=`travel-wrapped-${new Date().getFullYear()}-${videoFormat}.webm`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    }
+                    r();
+                };
+            });
+        }
+    }else if(!useMP4&&mediaRecorder){
+        mediaRecorder.stop();
+    }
+    
+    modal.classList.remove('active');
+    downloadBtn.disabled=false;
+    isRecording=false;
 }
 
 const savedTrips=localStorage.getItem('wanderbookTrips');
